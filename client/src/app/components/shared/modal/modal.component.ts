@@ -20,12 +20,13 @@ interface Modal {
 })
 export class ModalComponent implements OnInit {
   currentModal: Modal | null = null;
-  newPseudo: string = '';
+  newPseudo: string | null = '';
 
   constructor(private modalService: ModalService) {}
 
   ngOnInit() {
     this.modalService.modal$.subscribe((modal: any) => {
+      console.log('🔔 Modal reçu:', modal); // DEBUG
       this.currentModal = modal;
       if (modal?.type === 'changePseudo') {
         this.newPseudo = '';

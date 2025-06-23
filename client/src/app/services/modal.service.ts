@@ -1,16 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export interface Modal {
+interface Modal {
   id: string;
   title: string;
   content: string;
-  message?: string;       
-  confirmText?: string;    
-  placeholder?: string;    
-  initialValue?: string;   
-  type: 'info' | 'confirm' | 'error' | 'input' | 'changePseudo'; 
-  isOpen: boolean;
+  type?: string;
+  confirmText?: string;
 }
 
 @Injectable({
@@ -19,23 +15,36 @@ export interface Modal {
 export class ModalService {
   private modalSubject = new BehaviorSubject<Modal | null>(null);
   public modal$ = this.modalSubject.asObservable();
+  
   private resolveFunction: ((value: boolean) => void) | null = null;
   private pseudoResolve: ((value: string | null) => void) | null = null;
 
-  open(modal: Omit<Modal, 'isOpen'>) {
-    this.modalSubject.next({ ...modal, isOpen: true });
+  open(modal: Modal) {
+    this.modalSubject.next(modal);
   }
 
-  confirm(title: string, content: string): Promise<boolean> {
+  close() {
+    this.modalSubject.next(null);
+    if (this.resolveFunction) {
+      this.resolveFunction(false);
+      this.resolveFunction = null;
+    }
+    if (this.pseudoResolve) {
+      this.pseudoResolve(null);
+      this.pseudoResolve = null;
+    }
+  }
+
+  // POUR LES CONFIRMATIONS NORMALES
+  confirm(title: string, content: string, confirmText: string = 'Confirmer'): Promise<boolean> {
     return new Promise((resolve) => {
       this.resolveFunction = resolve;
       this.open({
         id: 'confirm',
         title,
         content,
-        message: content,
-        confirmText: 'Confirmer',
-        type: 'confirm'
+        type: 'confirm',
+        confirmText
       });
     });
   }
@@ -48,24 +57,13 @@ export class ModalService {
     this.close();
   }
 
-  close() {
-    this.modalSubject.next(null);
-  }
-
-  cancel() {    
-    this.close();
-  }
-
-  showConfirm(title: string, message: string): Promise<boolean> {
-    return this.confirm(title, message);
-  }
-
+  // POUR LE CHANGEMENT DE PSEUDO
   changePseudo(currentPseudo: string): Promise<string | null> {
     return new Promise((resolve) => {
       this.pseudoResolve = resolve;
       this.open({
         id: 'changePseudo',
-        title: 'Changer de pseudo',
+        title: '📝 Changer de pseudo',
         content: `Pseudo actuel: ${currentPseudo}`,
         type: 'changePseudo'
       });

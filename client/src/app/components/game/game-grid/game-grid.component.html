@@ -412,17 +412,7 @@
 </div>
 
 <!-- ✅ Modal générique -->
-<app-modal
-  [isOpen]="(modalService.modal$ | async) !== null"
-  [type]="(modalService.modal$ | async)?.type === 'input' ? 'input' : 'confirm'"
-  [title]="(modalService.modal$ | async)?.title || ''"
-  [message]="(modalService.modal$ | async)?.message || ''"
-  [confirmText]="(modalService.modal$ | async)?.confirmText || 'Confirmer'"
-  [placeholder]="(modalService.modal$ | async)?.placeholder || ''"
-  [initialValue]="(modalService.modal$ | async)?.initialValue || ''"
-  (confirmed)="modalService.close()"
-  (cancelled)="modalService.cancel()">
-</app-modal>
+<app-modal></app-modal>
 
 <!-- ✅ Système de toasts (placé à la fin) -->
 <app-toast></app-toast>

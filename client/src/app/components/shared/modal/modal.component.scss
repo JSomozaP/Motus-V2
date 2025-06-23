@@ -1,0 +1,144 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 300px;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  
+  h3 {
+    margin: 0;
+    color: #333;
+    font-size: 18px;
+  }
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  
+  &:hover {
+    color: #000;
+  }
+}
+
+.modal-body {
+  margin-bottom: 20px;
+  
+  p {
+    margin: 0 0 15px 0; /* CORRECTION ICI */
+    color: #555;
+    line-height: 1.4;
+  }
+}
+
+/* CORRECTION PRINCIPALE - INPUT CENTRÉ */
+.pseudo-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  margin: 10px 0; /* CENTRAGE CORRIGÉ */
+  box-sizing: border-box; /* IMPORTANT */
+  
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+  
+  &::placeholder {
+    color: #999;
+  }
+}
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px; /* ESPACEMENT UNIFORME */
+}
+
+.btn-cancel, .btn-confirm {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 80px; /* LARGEUR MINIMUM */
+  transition: background-color 0.2s ease;
+}
+
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+  
+  &:hover {
+    background-color: #5a6268;
+  }
+}
+
+.btn-confirm {
+  background-color: #007bff;
+  color: white;
+  
+  &:hover {
+    background-color: #0056b3;
+  }
+  
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+/* AMÉLIORATION VISUELLE */
+.modal-body div {
+  margin-bottom: 0; /* ÉVITER LES DOUBLONS MARGIN */
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .modal-content {
+    margin: 20px;
+    min-width: auto;
+    max-width: calc(100vw - 40px);
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    
+    .btn-cancel, .btn-confirm {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+}

@@ -1,15 +1,14 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Router, RouterLink } from '@angular/router'; // AJOUTER Router
+import { KeyboardComponent } from '../keyboard/keyboard.component';
+import { ToastComponent } from '../../shared/toast/toast.component';
+import { ModalComponent } from '../../shared/modal/modal.component'; // AJOUTER ModalComponent
 import { GameService } from '../../../services/game.service';
 import { AuthService } from '../../../services/auth.service';
-import { ToastComponent } from '../../shared/toast/toast.component';
-import { ToastService } from '../../../services/toast.service';
-import { ModalComponent } from '../../shared/modal/modal.component';
 import { ModalService } from '../../../services/modal.service';
-import { KeyboardComponent } from '../keyboard/keyboard.component';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-game-grid',
@@ -21,6 +20,7 @@ import { KeyboardComponent } from '../keyboard/keyboard.component';
     FormsModule, 
     KeyboardComponent, 
     ToastComponent, 
+    ModalComponent, // AJOUTER ICI
     RouterLink  
   ]
 })
@@ -94,10 +94,11 @@ export class GameGridComponent implements OnInit {
   secretWord: string = '';
 
   constructor(
-  private gameService: GameService,
-  private authService: AuthService,
-  private toastService: ToastService,
-  public modalService: ModalService,
+    private gameService: GameService,
+    private authService: AuthService,
+    public modalService: ModalService,
+    private toastService: ToastService,
+    private router: Router, // AJOUTER Router
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -671,12 +672,16 @@ export class GameGridComponent implements OnInit {
   }
 
   logout() {
+    console.log('🚪 Déconnexion demandée');
+    
     this.modalService.confirm(
-      'Confirmer la déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?'
+      'Déconnexion', 
+      'Êtes-vous sûr de vouloir vous déconnexter ?', 
+      'Se déconnecter'
     ).then((confirmed: boolean) => {
       if (confirmed) {
         this.authService.logout();
+        this.router.navigate(['/login']);
       }
     });
   }
@@ -719,6 +724,7 @@ export class GameGridComponent implements OnInit {
 
   changeAlias() {
     const currentAlias = this.getCurrentPlayerAlias();
+    console.log('🔄 Changement pseudo demandé:', currentAlias);
     
     this.modalService.changePseudo(currentAlias).then((newPseudo: string | null) => {
       if (newPseudo && isPlatformBrowser(this.platformId)) {
