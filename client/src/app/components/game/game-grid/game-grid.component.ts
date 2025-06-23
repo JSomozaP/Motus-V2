@@ -21,7 +21,6 @@ import { KeyboardComponent } from '../keyboard/keyboard.component';
     FormsModule, 
     KeyboardComponent, 
     ToastComponent, 
-    ModalComponent,
     RouterLink  
   ]
 })
@@ -719,17 +718,13 @@ export class GameGridComponent implements OnInit {
   }
 
   changeAlias() {
-    this.modalService.confirm(
-      '✏️ Changer de pseudo',
-      'Quel est votre nouveau pseudo ?'
-    ).then((confirmed: boolean) => {
-      if (confirmed && isPlatformBrowser(this.platformId)) {
-        const newAlias = prompt('Nouveau pseudo:') || this.getCurrentPlayerAlias();
-        localStorage.setItem('playerAlias', newAlias);
-        this.toastService.success(`✅ Pseudo: ${newAlias}`, 2000);
+    const currentAlias = this.getCurrentPlayerAlias();
+    
+    this.modalService.changePseudo(currentAlias).then((newPseudo: string | null) => {
+      if (newPseudo && isPlatformBrowser(this.platformId)) {
+        localStorage.setItem('playerAlias', newPseudo);
+        this.toastService.success(`✅ Pseudo changé: ${newPseudo}`, 2000);
       }
-    }).catch((error: any) => {
-      console.error('Erreur changement pseudo:', error);
     });
   }
 

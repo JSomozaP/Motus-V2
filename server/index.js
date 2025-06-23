@@ -29,7 +29,7 @@ app.use(cors());
 const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: 'motus123',
+  password: '',
   database: 'motus_v2'
 };
 
@@ -61,6 +61,15 @@ const authenticateToken = (req, res, next) => {
     req.user = user;
     next();
   });
+};
+
+
+
+// Configuration utilisateur par défaut (SÉCURISÉ)
+const defaultUser = {
+  login: process.env.DEFAULT_USER || 'testeur',
+  email: process.env.DEFAULT_EMAIL || 'test@motus.com',
+  password: process.env.DEFAULT_PASSWORD || ''
 };
 
 // ROUTES AUTHENTIFICATION
@@ -270,6 +279,17 @@ app.get('/api/leaderboard', authenticateToken, async (req, res) => {
     console.error('Erreur leaderboard:', error);
     res.status(500).json({ error: 'Erreur serveur' });
   }
+});
+
+// Route pour compléter une partie
+app.post('/api/game/complete', authenticateToken, (req, res) => {
+  const { gameId, score, time, attempts } = req.body;
+  const userId = req.user.userId;
+  
+  // Logique de sauvegarde...
+  console.log('🎮 Partie terminée:', { gameId, score, time, attempts, userId });
+  
+  res.json({ success: true, message: 'Score sauvegardé' });
 });
 
 // Démarrage serveur

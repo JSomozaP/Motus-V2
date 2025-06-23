@@ -1,1 +1,47 @@
-<p>modal works!</p>
+<!-- AJOUTER ce cas pour le changement de pseudo -->
+<div class="modal-overlay" *ngIf="currentModal" (click)="close()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ currentModal.title }}</h3>
+      <button class="close-btn" (click)="close()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- CAS SPÉCIAL : Changement de pseudo -->
+      <div *ngIf="currentModal.type === 'changePseudo'">
+        <p>{{ currentModal.content }}</p>
+        <input 
+          type="text" 
+          [(ngModel)]="newPseudo" 
+          placeholder="Nouveau pseudo"
+          class="pseudo-input"
+          maxlength="20"
+          (keyup.enter)="confirmPseudo()"
+        >
+      </div>
+      
+      <!-- CAS NORMAL : Confirmation -->
+      <div *ngIf="currentModal.type === 'confirm'">
+        <p>{{ currentModal.content }}</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <!-- BOUTONS pour changement pseudo -->
+      <div *ngIf="currentModal.type === 'changePseudo'">
+        <button class="btn-cancel" (click)="close()">Annuler</button>
+        <button class="btn-confirm" (click)="confirmPseudo()" [disabled]="!newPseudo?.trim()">
+          Confirmer
+        </button>
+      </div>
+      
+      <!-- BOUTONS pour confirmation -->
+      <div *ngIf="currentModal.type === 'confirm'">
+        <button class="btn-cancel" (click)="confirmModal(false)">Annuler</button>
+        <button class="btn-confirm" (click)="confirmModal(true)">
+          {{ currentModal.confirmText || 'Confirmer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

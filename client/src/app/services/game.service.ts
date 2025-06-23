@@ -98,17 +98,25 @@ export class GameService {
     );
   }
 
-  completeGame(gameId: number, score: number, timeSeconds: number, attempts: number): Observable<any> {
-    return this.http.post('/api/game/complete',
-      { gameId, score, timeSeconds, attempts },
-      { headers: this.getHeaders() }
-    );
+  completeGame(gameId: number, score: number, time: number, attempts: number): Observable<any> {
+    const gameData = {
+      gameId,
+      score,
+      time,
+      attempts,
+      userId: 1 // Ou récupérer l'ID utilisateur réel
+    };
+    
+    // CORRIGER : Utiliser le bon port (3000 au lieu de 4200)
+    return this.http.post('http://localhost:3000/api/game/complete', gameData, {
+      headers: this.getHeaders()
+    });
   }
 
   getLeaderboard(): Observable<any> {
-    const token = localStorage.getItem('authToken');
+    // Récupérer le bon token
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
     
-    // SOLUTION : Créer un objet options correct
     const options: any = {};
     if (token) {
       options.headers = { 'Authorization': `Bearer ${token}` };
