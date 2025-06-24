@@ -194,6 +194,81 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+
+
+// Route pour demander réinitialisation mot de passe
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    const connection = await mysql.createConnection(dbConfig);
+    const [users] = await connection.execute(
+      'SELECT id FROM users WHERE email = ?',
+      [email]
+    );
+    
+    if (users.length === 0) {
+      await connection.end();
+      return res.status(400).json({ error: 'Email non trouvé' });
+    }
+    
+    // Générer token de réinitialisation
+    const resetToken = Math.random().toString(36).substr(2, 9);
+    const resetExpiry = new Date(Date.now() + 3600000); // 1 heure
+    
+    await connection.execute(
+      'UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?',
+      [resetToken, resetExpiry, email]
+    );
+    await connection.end();
+    
+    // Envoyer email de réinitialisation
+    const emailSent = await emailService.sendPasswordResetEmail(email, resetToken);
+    
+    if (emailSent) {
+      res.json({ message: 'Email de réinitialisation envoyé' });
+    } else {
+      res.status(500).json({ error: 'Erreur envoi email' });
+    }
+    
+  } catch (error) {
+    console.error('Erreur forgot password:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Route pour réinitialiser le mot de passe
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    
+    const connection = await mysql.createConnection(dbConfig);
+    const [users] = await connection.execute(
+      'SELECT id FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()',
+      [token]
+    );
+    
+    if (users.length === 0) {
+      await connection.end();
+      return res.status(400).json({ error: 'Token invalide ou expiré' });
+    }
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    await connection.execute(
+      'UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?',
+      [hashedPassword, token]
+    );
+    await connection.end();
+    
+    res.json({ message: 'Mot de passe réinitialisé avec succès' });
+    
+  } catch (error) {
+    console.error('Erreur reset password:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // ROUTES JEU (protégées)
 app.get('/api/game/word/:difficulty', authenticateToken, async (req, res) => {
   try {

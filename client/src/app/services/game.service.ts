@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
+import { AuthService } from './auth.service'; // AJOUTER CETTE LIGNE
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,11 @@ import { tap, map, catchError } from 'rxjs/operators';
 export class GameService {
   private apiUrl = 'http://localhost:3000/api'; // AJOUTER CETTE LIGNE
   
-  constructor(private http: HttpClient) { }
+  // CORRIGER le constructeur pour injecter AuthService :
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService  // AJOUTER CETTE LIGNE
+  ) { }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('authToken');
@@ -115,19 +120,23 @@ export class GameService {
   }
 
   getLeaderboard(): Observable<any[]> {
-    const token = localStorage.getItem('token');
+    // Maintenant this.authService.getToken() fonctionnera
+    const token = this.authService.getToken();
+    
+    console.log('🔄 Chargement leaderboard avec token:', token ? 'Présent' : 'Absent');
+    
+    if (!token) {
+      console.error('❌ Aucun token disponible pour le leaderboard');
+      return of([]);
+    }
+    
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-
-    console.log('🔄 Chargement leaderboard avec token:', token ? 'Présent' : 'Absent');
     
     return this.http.get<any[]>(`${this.apiUrl}/leaderboard`, { headers }).pipe(
-      map((response: any) => {
-        console.log('✅ Leaderboard reçu:', response);
-        return response;
-      }),
-      catchError((error) => {
+      tap(scores => console.log('✅ Scores reçus:', scores)),
+      catchError(error => {
         console.error('❌ Erreur leaderboard:', error);
         return of([]);
       })

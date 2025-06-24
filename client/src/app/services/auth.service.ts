@@ -8,6 +8,7 @@ import { Observable, BehaviorSubject, tap } from 'rxjs';
 export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  private apiUrl = 'http://localhost:3000/api'; // Ajout de cette ligne
 
   constructor(private http: HttpClient) {
     // Vérifier si token existe au démarrage
@@ -57,5 +58,18 @@ export class AuthService {
     const token = this.getToken();
     const emailVerified = localStorage.getItem('emailVerified');
     return !!token && emailVerified === 'true';
+  }
+
+  
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/reset-password`, { 
+      token, 
+      newPassword 
+    });
   }
 }
