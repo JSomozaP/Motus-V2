@@ -7,6 +7,7 @@ import { tap, map, catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class GameService {
+  private apiUrl = 'http://localhost:3000/api'; // AJOUTER CETTE LIGNE
   
   constructor(private http: HttpClient) { }
 
@@ -113,15 +114,23 @@ export class GameService {
     });
   }
 
-  getLeaderboard(): Observable<any> {
-    // Récupérer le bon token
-    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+  getLeaderboard(): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    console.log('🔄 Chargement leaderboard avec token:', token ? 'Présent' : 'Absent');
     
-    const options: any = {};
-    if (token) {
-      options.headers = { 'Authorization': `Bearer ${token}` };
-    }
-    
-    return this.http.get('http://localhost:3000/api/leaderboard', options);
+    return this.http.get<any[]>(`${this.apiUrl}/leaderboard`, { headers }).pipe(
+      map((response: any) => {
+        console.log('✅ Leaderboard reçu:', response);
+        return response;
+      }),
+      catchError((error) => {
+        console.error('❌ Erreur leaderboard:', error);
+        return of([]);
+      })
+    );
   }
 }

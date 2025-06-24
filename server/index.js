@@ -1,3 +1,5 @@
+require('dotenv').config(); // DOIT ÊTRE EN PREMIÈRE LIGNE !
+
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
@@ -5,7 +7,14 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
-require('dotenv').config();
+const emailService = require('./email-service'); 
+
+console.log('🔧 Config DB:', {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD ? '***' : 'MANQUANT',
+  database: process.env.DB_NAME
+});
 
 const app = express();
 
@@ -27,10 +36,10 @@ app.use(cors());
 
 // Configuration base de données
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'motus_v2'
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root', 
+  password: process.env.DB_PASSWORD || 'motus123', // IMPORTANT !
+  database: process.env.DB_NAME || 'motus_v2'
 };
 
 // Configuration email (à adapter selon vos besoins)
@@ -103,10 +112,23 @@ app.post('/api/auth/register', async (req, res) => {
     
     await connection.end();
     
-    // Envoyer email de vérification (simulé pour l'instant)
-    console.log(`Email de vérification pour ${email}: http://localhost:4200/verify/${verificationToken}`);
+    // ENVOYER EMAIL RÉEL (pas juste console.log)
+    const emailSent = await emailService.sendVerificationEmail(email, verificationToken);
     
-    res.json({ message: 'Inscription réussie. Vérifiez votre email.' });
+    if (emailSent) {
+      console.log(`📧 Email de vérification envoyé à ${email}`);
+      res.json({ 
+        message: 'Inscription réussie. Vérifiez votre email pour activer votre compte.',
+        emailSent: true 
+      });
+    } else {
+      console.log(`⚠️ Email non envoyé, mais compte créé pour ${email}`);
+      res.json({ 
+        message: 'Inscription réussie. Email de vérification non envoyé (vérifiez la config SMTP).',
+        emailSent: false 
+      });
+    }
+    
   } catch (error) {
     console.error('Erreur inscription:', error);
     res.status(500).json({ error: 'Erreur serveur' });
