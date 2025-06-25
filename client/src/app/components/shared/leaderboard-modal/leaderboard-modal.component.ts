@@ -36,10 +36,10 @@ export class LeaderboardModalComponent implements OnInit {
       next: (scores) => {
         console.log('📊 Scores reçus pour modal:', scores);
         
-        // ✅ CORRIGER le mapping pour afficher les noms :
+        // CORRIGER le mapping pour afficher les noms :
         this.leaderboard = scores.map((score: any, index: number) => ({
           rank: index + 1,
-          playerName: score.login || score.playerAlias || 'Joueur',  // ← AJOUTER login
+          playerName: score.login || score.playerAlias || 'Joueur',
           totalScore: score.best_score || score.score || 0,
           gamesPlayed: score.games_played || score.wordsFound || 1,
           winRate: Math.round(((score.games_won || score.gamesPlayed || 1) / (score.games_played || 1)) * 100),

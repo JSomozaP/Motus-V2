@@ -1,4 +1,4 @@
-// ✅ CSS pour le modal de connexion
+// CSS pour le modal de connexion
 .login-modal-overlay {
   position: fixed;
   top: 0;
@@ -93,7 +93,7 @@
   text-align: center;
 }
 
-// ✅ Page d'accueil
+// Page d'accueil
 .welcome-screen {
   display: flex;
   justify-content: center;
@@ -138,7 +138,7 @@
   }
 }
 
-// ✅ Informations du joueur
+// Informations du joueur
 .player-info {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 15px 20px;
@@ -179,7 +179,7 @@
   }
 }
 
-// ✅ Interface de jeu avec stats
+// Interface de jeu avec stats
 .game-interface {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   padding: 20px;
@@ -273,7 +273,7 @@
   }
 }
 
-// ✅ Panneau des scores
+// Panneau des scores
 .scores-panel {
   background: white;
   border-radius: 12px;
@@ -376,7 +376,7 @@
   }
 }
 
-// ✅ CSS existant pour le jeu
+// CSS existant pour le jeu
 .game-container {
   display: flex;
   flex-direction: column;
@@ -478,7 +478,7 @@
   }
 }
 
-// ✅ Styles pour le sélecteur de difficulté
+// Styles pour le sélecteur de difficulté
 .difficulty-section {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
   border: 2px solid rgba(102, 126, 234, 0.2);
@@ -587,7 +587,7 @@
   }
 }
 
-// ✅ Styles spécialisés pour chaque difficulté
+// Styles spécialisés pour chaque difficulté
 .difficulty-btn.facile {
   &:hover, &.active {
     border-color: #4CAF50;
@@ -627,7 +627,7 @@
   }
 }
 
-// ✅ NOUVEAU - Styles pour le mode Cauchemar
+// NOUVEAU - Styles pour le mode Cauchemar
 .difficulty-btn.cauchemar {
   position: relative;
   overflow: hidden;
@@ -674,7 +674,7 @@
   }
 }
 
-// ✅ Boutons de prévisualisation
+// Boutons de prévisualisation
 .preview-buttons {
   display: flex;
   gap: 10px;
@@ -814,7 +814,7 @@
     animation: flip 0.6s ease-in-out;
   }
 
-  // ✅ CORRECTION - Style Motus traditionnel pour lettres absentes (incorrect)
+  // CORRECTION - Style Motus traditionnel pour lettres absentes (incorrect)
   &.incorrect {
     background-color: #007bff !important; // ✅ Force l'application
     color: white !important;
@@ -823,7 +823,7 @@
     animation: flip 0.6s ease-in-out;
   }
 
-  // ✅ Garder aussi .absent pour compatibilité
+  // Garder aussi .absent pour compatibilité
   &.absent {
     background-color: #007bff !important;
     color: white !important;
@@ -1146,7 +1146,7 @@
   }
 }
 
-// ✅ Animations
+// Animations
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
@@ -1191,7 +1191,7 @@
   }
 }
 
-// ✅ NOUVELLES animations pour le mode Cauchemar
+// NOUVELLES animations pour le mode Cauchemar
 @keyframes skull-shake {
   0%, 100% {
     transform: rotate(0deg);
@@ -1215,7 +1215,7 @@
   }
 }
 
-// ✅ Responsive design
+// Responsive design
 @media (max-width: 768px) {
   .game-container {
     padding: 10px;
@@ -1233,7 +1233,7 @@
       border-width: 2px;
     }
     
-    // ✅ CORRECTION - Aussi pour incorrect
+    // CORRECTION - Aussi pour incorrect
     &.incorrect,
     &.absent {
       border-width: 2px;
@@ -1289,14 +1289,14 @@
     }
   }
 
-  // ✅ Responsive pour le modal de connexion
+  // Responsive pour le modal de connexion
   .login-modal {
     padding: 20px;
     margin: 20px;
     max-width: 350px;
   }
   
-  // ✅ Responsive pour interface de jeu
+  // Responsive pour interface de jeu
   .session-stats {
     gap: 10px;
     
@@ -1323,7 +1323,7 @@
     }
   }
   
-  // ✅ Responsive pour difficulté
+  // Responsive pour difficulté
   .difficulty-section {
     padding: 15px;
     margin: 15px 0;
@@ -1447,11 +1447,11 @@
   }
 }
 
-// ✅ CORRECTION - Aussi dans la légende
+// CORRECTION - Aussi dans la légende
 .legend-cell {
   // ...existing code...
   
-  // ✅ Fond bleu pour les lettres absentes/incorrectes
+  // Fond bleu pour les lettres absentes/incorrectes
   &.absent-motus,
   &.incorrect-motus {
     background-color: #007bff;

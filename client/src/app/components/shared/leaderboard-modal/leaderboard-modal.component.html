@@ -53,16 +53,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  loadLeaderboard() {
-    this.gameService.getLeaderboard().subscribe({
-      next: (scores) => {
-        console.log('🔍 Premier score brut:', scores[0]);
-        console.log('🔍 Propriétés disponibles:', Object.keys(scores[0]));
-        
-        // ... reste du code
-      }
-    });
-  }
-</script>

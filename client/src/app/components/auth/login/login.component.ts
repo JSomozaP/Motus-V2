@@ -28,7 +28,7 @@ export class LoginComponent {
     private router: Router
   ) {}
 
-  // ✅ Méthode pour le bouton de test
+  // Méthode pour le bouton de test
   useTestAccount() {
     this.email = 'jeremy@test.com';
     this.password = 'motus123';
@@ -64,7 +64,7 @@ export class LoginComponent {
       return;
     }
     
-    this.errorMessage = ''; // Effacer les erreurs précédentes
+    this.errorMessage = ''; // Efface les erreurs précédentes
     this.showForgotModal = true;
     
     console.log('🔧 showForgotModal:', this.showForgotModal); // Debug

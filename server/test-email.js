@@ -8,7 +8,7 @@ async function testRealEmail() {
   try {
     console.log('📝 Test inscription avec vraie adresse...');
     const response = await axios.post(`${BASE_URL}/api/auth/register`, {
-      email: 'jeremy.somoza@laplateforme.io', // VOTRE VRAIE ADRESSE
+      email: 'jeremy.somoza@laplateforme.io', // TEST VRAIE ADRESSE
       password: 'motus123'
     });
     

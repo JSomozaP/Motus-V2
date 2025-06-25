@@ -23,11 +23,11 @@ export class KeyboardComponent {
 
   // Gestion des clics sur les touches
   onKeyClick(key: string) {
-    console.log('🎹 Clavier - touche cliquée:', key); // ✅ Debug
+    console.log('🎹 Clavier - touche cliquée:', key); // Debug
     
-    // ✅ Normaliser la valeur pour le bouton supprimer
+    // Normaliser la valeur pour le bouton supprimer
     if (key === 'DEL' || key === 'DELETE' || key === '⌫') {
-      this.keyPressed.emit('BACKSPACE'); // ✅ Envoyer BACKSPACE pour uniformiser
+      this.keyPressed.emit('BACKSPACE'); // Envoyer BACKSPACE pour uniformiser
     } else {
       this.keyPressed.emit(key);
     }

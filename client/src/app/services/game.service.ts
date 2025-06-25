@@ -8,14 +8,14 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class GameService {
-  private apiUrl = 'http://localhost:3000/api/games'; // ✅ CORRIGER AVEC /games
+  private apiUrl = 'http://localhost:3000/api/games';
   
   constructor(
     private http: HttpClient,
     private authService: AuthService
   ) { }
 
-  // ✅ UTILISER la méthode getToken d'AuthService
+  // Méthode getToken d'AuthService
   private getToken(): string | null {
     return this.authService.getToken();
   }
@@ -85,7 +85,7 @@ export class GameService {
         console.log('📡 Réponse API reçue');
         
         if (response && response.length > 0) {
-          // ✅ FILTRER les mots valides seulement
+          // FILTRE les mots valides seulement
           const validWords = response.filter((word: any) => 
             this.isValidWord(word.name.toUpperCase())
           );
@@ -123,18 +123,18 @@ export class GameService {
     );
   }
 
-  // ✅ CORRIGER completeGame avec bonne URL
+  
   completeGame(gameId: number, score: number, time: number, attempts: number, playerAlias?: string): Observable<any> {
     const headers = this.getHeaders();
     
     console.log('💾 Appel completeGame vers:', `${this.apiUrl}/${gameId}/complete`);
     
-    // ✅ AJOUTER playerAlias dans le body
+  
     return this.http.post(`${this.apiUrl}/${gameId}/complete`, {
       score,
       time,
       attempts,
-      playerAlias  // ← NOUVEAU
+      playerAlias  
     }, { headers }).pipe(
       tap(response => {
         console.log('✅ Réponse completeGame:', response);
@@ -146,7 +146,7 @@ export class GameService {
     );
   }
 
-  // ✅ CORRIGER getLeaderboard
+  
   getLeaderboard(): Observable<any[]> {
     const headers = this.getHeaders();
     const leaderboardUrl = 'http://localhost:3000/api/leaderboard';

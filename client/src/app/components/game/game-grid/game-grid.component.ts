@@ -1,15 +1,15 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router'; // AJOUTER Router
+import { Router } from '@angular/router';
 import { KeyboardComponent } from '../keyboard/keyboard.component';
 import { ToastComponent } from '../../shared/toast/toast.component';
-import { ModalComponent } from '../../shared/modal/modal.component'; // AJOUTER ModalComponent
+import { ModalComponent } from '../../shared/modal/modal.component';
 import { GameService } from '../../../services/game.service';
 import { AuthService } from '../../../services/auth.service';
 import { ModalService } from '../../../services/modal.service';
 import { ToastService } from '../../../services/toast.service';
-import { LeaderboardModalComponent } from '../../shared/leaderboard-modal/leaderboard-modal.component'; // AJOUTER CET IMPORT
+import { LeaderboardModalComponent } from '../../shared/leaderboard-modal/leaderboard-modal.component';
 
 @Component({
   selector: 'app-game-grid',
@@ -21,12 +21,12 @@ import { LeaderboardModalComponent } from '../../shared/leaderboard-modal/leader
     FormsModule, 
     KeyboardComponent, 
     ToastComponent,
-    ModalComponent, // AJOUTER ICI
-    LeaderboardModalComponent  // AJOUTER CETTE LIGNE
+    ModalComponent,
+    LeaderboardModalComponent
   ]
 })
 export class GameGridComponent implements OnInit {
-  // ✅ Propriétés de base du jeu
+  // Propriétés de base du jeu
   grid: Array<Array<{letter: string, state: string}>> = [];
   currentRow = 0;
   currentCol = 0;
@@ -40,7 +40,7 @@ export class GameGridComponent implements OnInit {
   wordFound = false;
   errorMessage = '';
   
-  // ✅ Authentification
+  // Authentification
   isAuthenticated = false;
   showLoginModal = false;
   loginAlias = '';
@@ -49,10 +49,10 @@ export class GameGridComponent implements OnInit {
   loginError = '';
   loginLoading = false;
 
-  // ✅ États du clavier
+  // États du clavier
   keyStates: { [key: string]: string } = {};
 
-  // ✅ Statistiques de session
+  // Statistiques de session
   sessionStats = {
     totalScore: 0,
     wordsFound: 0,
@@ -62,7 +62,7 @@ export class GameGridComponent implements OnInit {
     perfectWords: 0
   };
 
-  // ✅ Historique et scores
+  // Historique et scores
   wordsHistory: Array<{
     attempts: number;
     wordScore: number;
@@ -72,11 +72,11 @@ export class GameGridComponent implements OnInit {
 
   topScores: any[] = [];
 
-  // ✅ Variables de timing
+  // Variables de timing
   perfectWordStreak = 0;
   wordStartTime = Date.now();
 
-  // ✅ Scores et difficulté
+  // Scores et difficulté
   activeScoreTab = 'session';
   currentDifficulty: 'facile' | 'moyen' | 'difficile' | 'cauchemar' = 'facile';
   showDifficultySelector = false;
@@ -85,7 +85,7 @@ export class GameGridComponent implements OnInit {
   selectedDifficulty: string = 'facile';  
   currentWord: string = '';              
 
-  // ✅ NOUVELLES PROPRIÉTÉS POUR LA NOUVELLE LOGIQUE DE JEU
+  // NOUVELLES PROPRIÉTÉS POUR LA NOUVELLE LOGIQUE DE JEU
   guesses: string[] = [];
   currentGuess: string = '';
   gameFinished: boolean = false;
@@ -94,15 +94,15 @@ export class GameGridComponent implements OnInit {
   maxAttempts: number = 6;
   secretWord: string = '';
 
-  // AJOUTER ces propriétés et méthodes :
-  showLeaderboardModal = false; // AJOUTER
+  
+  showLeaderboardModal = false;
 
   constructor(
     private gameService: GameService,
     private authService: AuthService,
     public modalService: ModalService,
     private toastService: ToastService,
-    private router: Router, // AJOUTER Router
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -123,7 +123,7 @@ export class GameGridComponent implements OnInit {
     }
   }
 
-  // ✅ MÉTHODES D'AUTHENTIFICATION
+  // MÉTHODES D'AUTHENTIFICATION
   checkAuthentication() {
     this.isAuthenticated = true;
     if (this.isAuthenticated) {
@@ -168,7 +168,7 @@ export class GameGridComponent implements OnInit {
     this.onLogin();
   }
 
-  // ✅ MÉTHODES DE DIFFICULTÉ
+  // MÉTHODES DE DIFFICULTÉ
   private setupDifficultySources() {
     if (this.currentDifficulty === 'cauchemar') {
       // this.gameService.enableHardMode();
@@ -234,8 +234,7 @@ export class GameGridComponent implements OnInit {
     this.toastService.info(`${preview.label}\n${preview.description}`, 4000);
   }
 
-  // ✅ CHARGEMENT DE MOTS - NOUVELLE LOGIQUE UNIFIÉE
-  // ✅ CORRIGER la méthode loadNewWord
+  // CHARGEMENT DE MOTS - NOUVELLE LOGIQUE UNIFIÉE
   private loadNewWord() {
     this.isLoading = true;
     this.errorMessage = '';
@@ -246,7 +245,7 @@ export class GameGridComponent implements OnInit {
     let minLength: number;
     let maxLength: number;
     
-    // ✅ Définir les longueurs selon la difficulté
+    // Définir les longueurs selon la difficulté
     switch (this.currentDifficulty) {
       case 'facile':
         minLength = 3;
@@ -295,7 +294,7 @@ export class GameGridComponent implements OnInit {
     });
   }
 
-  // ✅ FALLBACK AVEC MOTS LOCAUX
+  // FALLBACK AVEC MOTS LOCAUX
   private loadFallbackWord() {
     console.warn('🔄 Fallback vers mots locaux');
     
@@ -322,7 +321,7 @@ export class GameGridComponent implements OnInit {
     console.log(`🔄 Mot fallback ${this.currentDifficulty}:`, randomWord);
   }
 
-  // ✅ MÉTHODES DE GRILLE
+  // MÉTHODES DE GRILLE
   private resetGrid() {
     this.grid = [];
     this.currentRow = 0;
@@ -355,7 +354,7 @@ export class GameGridComponent implements OnInit {
     console.log('✅ Grille réinitialisée avec indice:', this.hint);
   }
 
-  // ✅ GESTION DU CLAVIER
+  // GESTION DU CLAVIER
   handleKeyPress(key: string) {
     if (this.gameOver || this.isLoading) return;
 
@@ -398,7 +397,7 @@ export class GameGridComponent implements OnInit {
     this.checkWordLocally(guess, attemptNumber);
   }
 
-  // ✅ VÉRIFICATION LOCALE DU MOT
+  // VÉRIFICATION LOCALE DU MOT
   private checkWordLocally(guess: string, attemptNumber: number) {
     const target = this.targetWord;
     console.log('🔍 Vérification locale:', { guess, longueur: target.length, attemptNumber });
@@ -481,7 +480,7 @@ export class GameGridComponent implements OnInit {
     this.handleWordCheckResponse(mockResponse, guess, attemptNumber);
   }
 
-  // ✅ MISE À JOUR DES ÉTATS DU CLAVIER
+  // MISE À JOUR DES ÉTATS DU CLAVIER
   private updateKeyStates(guess: string, states: string[]) {
     for (let i = 0; i < guess.length; i++) {
       const letter = guess[i];
@@ -496,7 +495,7 @@ export class GameGridComponent implements OnInit {
     }
   }
 
-  // ✅ TRAITEMENT DES RÉPONSES
+  // TRAITEMENT DES RÉPONSES
   private handleWordCheckResponse(response: any, guess: string, attemptNumber: number) {
     console.log('🎯 Traitement réponse:', { response, guess, attemptNumber });
     
@@ -564,7 +563,7 @@ export class GameGridComponent implements OnInit {
     }
   }
 
-  // ✅ CALCUL DU SCORE
+  // CALCUL DU SCORE
   private calculateWordScore(attempts: number): {
     wordScore: number;
     bonusPoints: number;
@@ -606,7 +605,7 @@ export class GameGridComponent implements OnInit {
     };
   }
 
-  // ✅ MISE À JOUR DES STATISTIQUES
+  // MISE À JOUR DES STATISTIQUES
   private updateSessionStats(wordResult: {
     wordScore: number;
     bonusPoints: number;
@@ -640,7 +639,7 @@ export class GameGridComponent implements OnInit {
     this.saveStats();
   }
 
-  // ✅ SAUVEGARDE VIA BACKEND
+  // SAUVEGARDE VIA BACKEND
   private saveScoreViaBackend(score: number) {
     const playerAlias = this.getCurrentPlayerAlias();
     const userId = this.generateUserIdFromAlias(playerAlias);
@@ -655,7 +654,7 @@ export class GameGridComponent implements OnInit {
       playerAlias
     });
     
-    // ✅ AJOUTER le pseudo dans l'appel
+    // AJOUTER le pseudo dans l'appel
     this.gameService.completeGame(this.currentGameId, score, temps, 6, playerAlias).subscribe({
       next: (response) => {
         console.log('✅ Score sauvé pour', playerAlias, ':', response);
@@ -671,7 +670,7 @@ export class GameGridComponent implements OnInit {
 
   private generateUserIdFromAlias(alias: string): number {
     // Générer un ID plus simple qui correspond aux users existants
-    const existingUserIds = [4, 5]; // IDs qui existent dans votre BDD
+    const existingUserIds = [4, 5]; // IDs qui existent dans la BDD
     
     // Pour les tests, utiliser un ID existant selon l'alias
     if (alias.toLowerCase().includes('pouik')) {
@@ -683,7 +682,7 @@ export class GameGridComponent implements OnInit {
     }
   }
 
-  // ✅ MÉTHODES DE CONTRÔLE DU JEU
+  // MÉTHODES DE CONTRÔLE DU JEU
   restartGame() {
     console.log('🔄 Redémarrage jeu');
     this.isLoading = true;
@@ -698,7 +697,7 @@ export class GameGridComponent implements OnInit {
 
     this.toastService.success(`🏁 Session terminée ! Score: ${this.sessionStats.totalScore}`, 4000);
     
-    // ✅ AJOUTER : Recharger le leaderboard depuis la BDD
+    // AJOUTER : Recharger le leaderboard depuis la BDD
     setTimeout(() => {
       this.loadTopScores();
     }, 1000);
@@ -750,7 +749,7 @@ export class GameGridComponent implements OnInit {
     });
   }
 
-  // ✅ MÉTHODES UTILITAIRES
+  // MÉTHODES UTILITAIRES
   getCurrentPlayerAlias(): string {
     if (isPlatformBrowser(this.platformId)) {
       return localStorage.getItem('playerAlias') || localStorage.getItem('gameAlias') || 'Joueur';
@@ -770,7 +769,7 @@ export class GameGridComponent implements OnInit {
     });
   }
 
-  // ✅ CHARGEMENT DU LEADERBOARD
+  // CHARGEMENT DU LEADERBOARD
   loadTopScores() {
     console.log('🔄 Chargement TOP 3 depuis base de données...');
     
@@ -796,7 +795,7 @@ export class GameGridComponent implements OnInit {
     });
   }
 
-  // ✅ GESTION DES SCORES LOCAUX
+  // GESTION DES SCORES LOCAUX
   private resetSession() {
     this.sessionStats = {
       totalScore: 0,

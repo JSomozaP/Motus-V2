@@ -39,12 +39,12 @@ const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || 'votre_mot_de_passe',
-  database: process.env.DB_NAME || 'motus'  // ← CORRIGÉ !
+  database: process.env.DB_NAME || 'motus'
 };
 
-// Configuration email (à adapter selon vos besoins)
+// Configuration email (à adapter selon besoins)
 const emailConfig = {
-  host: 'smtp.gmail.com', // Ou votre fournisseur email
+  host: 'smtp.gmail.com', // Ou fournisseur email
   port: 587,
   secure: false,
   auth: {
@@ -395,7 +395,7 @@ app.get('/api/leaderboard', authenticateToken, async (req, res) => {
 // Route pour compléter une partie
 app.post('/api/games/:id/complete', authenticateToken, async (req, res) => {
   try {
-    const { score, time, attempts, playerAlias } = req.body; // ← AJOUTER playerAlias
+    const { score, time, attempts, playerAlias } = req.body;
     const userId = req.user.userId;
     
     console.log('🎮 Partie terminée:', { gameId: req.params.id, score, time, attempts, userId, playerAlias });
@@ -407,7 +407,7 @@ app.post('/api/games/:id/complete', authenticateToken, async (req, res) => {
       [userId]
     );
     
-    let userLogin = playerAlias || 'Joueur'; // ✅ UTILISER le pseudo envoyé
+    let userLogin = playerAlias || 'Joueur'; // UTILISER le pseudo envoyé
     if (userResult.length === 0) {
       // Créer avec le bon pseudo
       const randomPassword = '$2a$12$dummy.hash.for.new.user';
@@ -439,7 +439,7 @@ app.post('/api/games/:id/complete', authenticateToken, async (req, res) => {
   }
 });
 
-// AJOUTER cette ligne AVANT la ligne 364 dans index.js :
+
 app.get('/test', (req, res) => {
   console.log('🧪 Route de test appelée !');
   res.json({ message: 'Test OK', timestamp: new Date() });

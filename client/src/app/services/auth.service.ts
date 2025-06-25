@@ -8,7 +8,7 @@ import { Observable, BehaviorSubject, tap } from 'rxjs';
 export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$ = this.isLoggedInSubject.asObservable();
-  private apiUrl = 'http://localhost:3000/api'; // Ajout de cette ligne
+  private apiUrl = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {
     // Vérifier si token existe au démarrage
@@ -17,7 +17,7 @@ export class AuthService {
     this.isLoggedInSubject.next(!!token && emailVerified === 'true');
   }
 
-  // Remplacer TEMPORAIREMENT par des URLs complètes :
+  // Remplacement TEMPORAIRE par des URLs complètes :
   register(email: string, password: string): Observable<any> {
     return this.http.post('http://localhost:3000/api/auth/register', { email, password });
   }
@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('authToken');
+    return localStorage.getItem('token'); // Récupérer depuis localStorage
   }
 
   isAuthenticated(): boolean {
