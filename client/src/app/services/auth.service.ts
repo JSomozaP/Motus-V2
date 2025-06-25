@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token'); // Récupérer depuis localStorage
+    return localStorage.getItem('authToken'); // Au lieu de 'token'
   }
 
   isAuthenticated(): boolean {

@@ -85,7 +85,7 @@ app.post('/api/auth/register', async (req, res) => {
     const { email, password } = req.body;
     
     // Vérifier si l'utilisateur existe
-    
+    const connection = await connection;
     const [existing] = await connection.execute(
       'SELECT id FROM users WHERE email = ?',
       [email]
@@ -134,7 +134,7 @@ app.get('/api/auth/verify/:token', async (req, res) => {
   try {
     const { token } = req.params;
     
-    
+    const connection = await connection;
     const [result] = await connection.execute(
       'UPDATE users SET email_verified = TRUE, verification_token = NULL WHERE verification_token = ?',
       [token]
@@ -247,7 +247,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     
-    
+    const connection = await connection;
     const [users] = await connection.execute(
       'SELECT id FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()',
       [token]
@@ -297,7 +297,7 @@ app.get('/api/game/word/:difficulty', authenticateToken, async (req, res) => {
     const word = response.data[0].name.toUpperCase();
     
     // Stocker le mot en session (ici en base pour simplifier)
-    
+    const connection = await connection;
     await connection.execute(
       'INSERT INTO games (user_id, word, difficulty) VALUES (?, ?, ?)',
       [req.user.userId, word, difficulty]
@@ -323,7 +323,7 @@ app.post('/api/game/guess', authenticateToken, async (req, res) => {
   try {
     const { gameId, guess } = req.body;
     
-    
+    const connection = await connection;
     const [games] = await connection.execute(
       'SELECT word FROM games WHERE id = ? AND user_id = ?',
       [gameId, req.user.userId]
@@ -364,12 +364,14 @@ app.post('/api/game/guess', authenticateToken, async (req, res) => {
 // ROUTE LEADERBOARD
 app.get('/api/leaderboard', authenticateToken, async (req, res) => {
   console.log('🚀 === ENDPOINT /api/leaderboard APPELÉ ===');
-  console.log('👤 Utilisateur:', req.user.email);
+  console.log('📋 Headers:', req.headers.authorization);
   console.log('🔍 Method:', req.method);
   console.log('🌐 URL:', req.url);
   
   try {
     console.log('💾 Récupération leaderboard...');
+    // SUPPRIMER : const connection = await mysql.createConnection(dbConfig);
+    // UTILISER la connexion globale directement :
     const [leaderboard] = await connection.execute(`
       SELECT 
         login,

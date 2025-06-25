@@ -35,22 +35,24 @@ export class LoginComponent {
   }
 
   onSubmit() {
-    if (!this.email || !this.password) {
-      this.errorMessage = 'Veuillez remplir tous les champs';
-      return;
-    }
-
+    if (this.isLoading) return;
+    
     this.isLoading = true;
     this.errorMessage = '';
 
     this.authService.login(this.email, this.password).subscribe({
       next: (response) => {
-        console.log('Connexion réussie:', response);
+       
+        
+        this.authService.setToken(response.token);
+        
+        
         this.router.navigate(['/game']);
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Erreur de connexion:', error);
-        this.errorMessage = error.error?.message || 'Erreur de connexion';
+        this.errorMessage = error.error?.error || 'Erreur de connexion';
         this.isLoading = false;
       }
     });
