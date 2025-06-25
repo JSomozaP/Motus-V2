@@ -55,6 +55,28 @@ export class GameService {
     return this.http.get(url);
   }
 
+  private isValidWord(word: string): boolean {
+    // Caractères autorisés : A-Z uniquement (sans accents ni ligatures)
+    const allowedChars = /^[A-Z]+$/;
+    
+    // Caractères interdits courants
+    const forbiddenChars = /[ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞŸŒ]/i;
+    
+    return allowedChars.test(word) && !forbiddenChars.test(word);
+  }
+
+  private getFallbackWord(): any {
+    const fallbackWords = ['MOTUS', 'ROYAL', 'PIANO', 'FLEUR', 'BOIRE'];
+    const randomFallback = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+    
+    return {
+      gameId: Math.floor(Math.random() * 1000000),
+      word: randomFallback,
+      firstLetter: randomFallback.charAt(0),
+      length: randomFallback.length
+    };
+  }
+
   getNewWord(difficulty: string): Observable<any> {
     console.log(`🎯 Demande nouveau mot (difficulté: ${difficulty})`);
     
@@ -63,7 +85,17 @@ export class GameService {
         console.log('📡 Réponse API reçue');
         
         if (response && response.length > 0) {
-          const randomWord = response[Math.floor(Math.random() * response.length)];
+          // ✅ FILTRER les mots valides seulement
+          const validWords = response.filter((word: any) => 
+            this.isValidWord(word.name.toUpperCase())
+          );
+          
+          if (validWords.length === 0) {
+            console.log('⚠️ Aucun mot valide trouvé, utilisation fallback');
+            return this.getFallbackWord();
+          }
+          
+          const randomWord = validWords[Math.floor(Math.random() * validWords.length)];
           const wordData = {
             gameId: Math.floor(Math.random() * 1000000),
             word: randomWord.name.toUpperCase(),
@@ -71,26 +103,15 @@ export class GameService {
             length: randomWord.name.length
           };
           
-          console.log('✅ Nouveau mot généré (sécurisé)');
+          console.log('✅ Mot valide généré (sans caractères spéciaux)');
           return wordData;
         } else {
-          console.log('⚠️ Aucun mot trouvé, utilisation fallback');
-          return {
-            gameId: Math.floor(Math.random() * 1000000),
-            word: 'MOTUS',
-            firstLetter: 'M',
-            length: 5
-          };
+          return this.getFallbackWord();
         }
       }),
       catchError((error) => {
         console.error('❌ Erreur API trouve-mot:', error);
-        return of({
-          gameId: Math.floor(Math.random() * 1000000),
-          word: 'MOTUS',
-          firstLetter: 'M',
-          length: 5
-        });
+        return of(this.getFallbackWord());
       })
     );
   }
