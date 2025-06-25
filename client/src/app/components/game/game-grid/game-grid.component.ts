@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router'; // AJOUTER Router
+import { Router } from '@angular/router'; // AJOUTER Router
 import { KeyboardComponent } from '../keyboard/keyboard.component';
 import { ToastComponent } from '../../shared/toast/toast.component';
 import { ModalComponent } from '../../shared/modal/modal.component'; // AJOUTER ModalComponent
@@ -9,6 +9,7 @@ import { GameService } from '../../../services/game.service';
 import { AuthService } from '../../../services/auth.service';
 import { ModalService } from '../../../services/modal.service';
 import { ToastService } from '../../../services/toast.service';
+import { LeaderboardModalComponent } from '../../shared/leaderboard-modal/leaderboard-modal.component'; // AJOUTER CET IMPORT
 
 @Component({
   selector: 'app-game-grid',
@@ -19,9 +20,9 @@ import { ToastService } from '../../../services/toast.service';
     CommonModule, 
     FormsModule, 
     KeyboardComponent, 
-    ToastComponent, 
+    ToastComponent,
     ModalComponent, // AJOUTER ICI
-    RouterLink  
+    LeaderboardModalComponent  // AJOUTER CETTE LIGNE
   ]
 })
 export class GameGridComponent implements OnInit {
@@ -92,6 +93,9 @@ export class GameGridComponent implements OnInit {
   attempts: number = 0;
   maxAttempts: number = 6;
   secretWord: string = '';
+
+  // AJOUTER ces propriétés et méthodes :
+  showLeaderboardModal = false; // AJOUTER
 
   constructor(
     private gameService: GameService,
@@ -638,18 +642,45 @@ export class GameGridComponent implements OnInit {
 
   // ✅ SAUVEGARDE VIA BACKEND
   private saveScoreViaBackend(score: number) {
-    const userId = 1;
+    const playerAlias = this.getCurrentPlayerAlias();
+    const userId = this.generateUserIdFromAlias(playerAlias);
     const temps = Math.round((Date.now() - this.wordStartTime) / 1000);
-    const motId = this.gameId || Date.now();
     
-    this.gameService.completeGame(this.currentGameId, score, temps, 6).subscribe({
+    console.log('💾 Sauvegarde BDD avec userId dynamique:', {
+      gameId: this.currentGameId,
+      score,
+      temps,
+      attempts: 6,
+      userId,
+      playerAlias
+    });
+    
+    // ✅ AJOUTER le pseudo dans l'appel
+    this.gameService.completeGame(this.currentGameId, score, temps, 6, playerAlias).subscribe({
       next: (response) => {
-        console.log('💾 Score sauvegardé via backend:', response);
+        console.log('✅ Score sauvé pour', playerAlias, ':', response);
+        setTimeout(() => {
+          this.loadTopScores();
+        }, 500);
       },
       error: (error) => {
-        console.warn('⚠️ Erreur sauvegarde score backend:', error);
+        console.error('❌ Erreur sauvegarde pour', playerAlias, ':', error);
       }
     });
+  }
+
+  private generateUserIdFromAlias(alias: string): number {
+    // Générer un ID plus simple qui correspond aux users existants
+    const existingUserIds = [4, 5]; // IDs qui existent dans votre BDD
+    
+    // Pour les tests, utiliser un ID existant selon l'alias
+    if (alias.toLowerCase().includes('pouik')) {
+      return 4; // Utilisateur Pouik existant
+    } else if (alias.toLowerCase().includes('test')) {
+      return 5; // Utilisateur TestSansEmail existant  
+    } else {
+      return 4; // Par défaut, utiliser Pouik
+    }
   }
 
   // ✅ MÉTHODES DE CONTRÔLE DU JEU
@@ -665,8 +696,13 @@ export class GameGridComponent implements OnInit {
       return;
     }
 
-    this.saveScoreToTopScores();
     this.toastService.success(`🏁 Session terminée ! Score: ${this.sessionStats.totalScore}`, 4000);
+    
+    // ✅ AJOUTER : Recharger le leaderboard depuis la BDD
+    setTimeout(() => {
+      this.loadTopScores();
+    }, 1000);
+    
     this.resetSession();
     this.restartGame();
   }
@@ -736,48 +772,31 @@ export class GameGridComponent implements OnInit {
 
   // ✅ CHARGEMENT DU LEADERBOARD
   loadTopScores() {
-    console.log('🔄 Chargement TOP 3...');
+    console.log('🔄 Chargement TOP 3 depuis base de données...');
     
     this.gameService.getLeaderboard().subscribe({
       next: (scores) => {
-        console.log('✅ Scores reçus:', scores);
+        console.log('✅ Scores backend reçus:', scores);
         
+        // ADAPTER pour le top 3 ET le modal complet
         this.topScores = scores.slice(0, 3).map((score: any) => ({
-          playerAlias: score.login,
-          totalScore: score.score,
-          wordsFound: score.words_found,
-          bestStreak: 1,
-          date: score.date_achieved
+          playerAlias: score.email || score.login || 'Joueur',
+          totalScore: score.best_score || score.score || 0,
+          wordsFound: score.games_played || 1,
+          bestStreak: score.best_streak || 1,
+          date: score.date_achieved || new Date().toLocaleDateString('fr-FR')
         }));
         
-        console.log('🏆 TOP 3 adapté:', this.topScores);
+        console.log('🏆 TOP 3 depuis BDD:', this.topScores);
       },
       error: (error) => {
-        console.error('❌ Erreur chargement TOP 3:', error);
-        this.topScores = [];
+        console.error('❌ Erreur chargement TOP 3 BDD:', error);
+        this.topScores = []; // Vide si erreur backend
       }
     });
   }
 
   // ✅ GESTION DES SCORES LOCAUX
-  private saveScoreToTopScores() {
-    const newScore = {
-      playerAlias: this.getCurrentPlayerAlias(),
-      totalScore: this.sessionStats.totalScore,
-      wordsFound: this.sessionStats.wordsFound,
-      bestStreak: this.sessionStats.bestStreak,
-      date: new Date().toLocaleDateString('fr-FR')
-    };
-
-    this.topScores.push(newScore);
-    this.topScores.sort((a, b) => b.totalScore - a.totalScore);
-    this.topScores = this.topScores.slice(0, 10);
-
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('topScores', JSON.stringify(this.topScores));
-    }
-  }
-
   private resetSession() {
     this.sessionStats = {
       totalScore: 0,
@@ -821,5 +840,16 @@ export class GameGridComponent implements OnInit {
       localStorage.setItem('sessionStats', JSON.stringify(this.sessionStats));
       localStorage.setItem('wordsHistory', JSON.stringify(this.wordsHistory));
     }
+  }
+
+  // AJOUTER cette méthode :
+  openLeaderboardModal() {
+    console.log('📊 Ouverture modal leaderboard');
+    this.showLeaderboardModal = true;
+  }
+
+  closeLeaderboardModal() {
+    console.log('📊 Fermeture modal leaderboard');
+    this.showLeaderboardModal = false;
   }
 }

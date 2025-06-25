@@ -37,9 +37,9 @@ app.use(cors());
 // Configuration base de données
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root', 
-  password: process.env.DB_PASSWORD || 'motus123', // IMPORTANT !
-  database: process.env.DB_NAME || 'motus_v2'
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'votre_mot_de_passe',
+  database: process.env.DB_NAME || 'motus'  // ← CORRIGÉ !
 };
 
 // Configuration email (à adapter selon vos besoins)
@@ -193,8 +193,6 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
-
-
 
 // Route pour demander réinitialisation mot de passe
 app.post('/api/auth/forgot-password', async (req, res) => {
@@ -364,29 +362,92 @@ app.post('/api/game/guess', authenticateToken, async (req, res) => {
 
 // ROUTE LEADERBOARD
 app.get('/api/leaderboard', authenticateToken, async (req, res) => {
+  console.log('🚀 === ENDPOINT /api/leaderboard APPELÉ ===');
+  console.log('📋 Headers:', req.headers.authorization);
+  console.log('🔍 Method:', req.method);
+  console.log('🌐 URL:', req.url);
+  
   try {
+    console.log('💾 Connexion MySQL...');
     const connection = await mysql.createConnection(dbConfig);
-    const [leaderboard] = await connection.execute(
-      'SELECT email, difficulty, best_score, best_time, games_played FROM leaderboard_view LIMIT 50'
-    );
-    await connection.end();
+    const [leaderboard] = await connection.execute(`
+      SELECT 
+        login,
+        difficulty,
+        score as best_score,
+        words_found as games_played,
+        created_at as date_achieved
+      FROM wall_of_fame
+      ORDER BY score DESC
+      LIMIT 50
+    `);
     
-    res.json(leaderboard);
+    console.log('🏆 Données trouvées:', leaderboard.length, 'entrées');
+    console.log('📊 Premier élément:', leaderboard[0]);
+    
+    res.status(200).json(leaderboard);
   } catch (error) {
-    console.error('Erreur leaderboard:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error('❌ Erreur MySQL:', error);
+    res.status(500).json({ error: 'Erreur serveur', details: error.message });
   }
 });
 
 // Route pour compléter une partie
-app.post('/api/game/complete', authenticateToken, (req, res) => {
-  const { gameId, score, time, attempts } = req.body;
-  const userId = req.user.userId;
-  
-  // Logique de sauvegarde...
-  console.log('🎮 Partie terminée:', { gameId, score, time, attempts, userId });
-  
-  res.json({ success: true, message: 'Score sauvegardé' });
+app.post('/api/games/:id/complete', authenticateToken, async (req, res) => {
+  try {
+    const { score, time, attempts, playerAlias } = req.body; // ← AJOUTER playerAlias
+    const userId = req.user.userId;
+    
+    console.log('🎮 Partie terminée:', { gameId: req.params.id, score, time, attempts, userId, playerAlias });
+
+    // Vérifier/créer l'utilisateur
+    const connection = await mysql.createConnection(dbConfig);
+    const [userResult] = await connection.execute(
+      'SELECT pseudo FROM users WHERE id = ?',
+      [userId]
+    );
+    
+    let userLogin = playerAlias || 'Joueur'; // ✅ UTILISER le pseudo envoyé
+    if (userResult.length === 0) {
+      // Créer avec le bon pseudo
+      const randomPassword = '$2a$12$dummy.hash.for.new.user';
+      const randomSecu = Math.floor(Math.random() * 1000000000000000).toString();
+      
+      await connection.execute(`
+        INSERT INTO users (id, pseudo, password, numero_secu, created_at, updated_at)
+        VALUES (?, ?, ?, ?, NOW(), NOW())
+      `, [userId, userLogin, randomPassword, randomSecu]);
+      
+      console.log('✅ Nouvel utilisateur créé:', userLogin);
+    } else {
+      // Utiliser le pseudo envoyé ou celui en BDD
+      userLogin = playerAlias || userResult[0].pseudo;
+    }
+
+    // Sauvegarder avec le bon login
+    await connection.execute(`
+      INSERT INTO wall_of_fame (user_id, score, login, difficulty, words_found, created_at)
+      VALUES (?, ?, ?, 'facile', 1, NOW())
+    `, [userId, score, userLogin]);
+    
+    console.log('🏆 Score ajouté au wall_of_fame pour', userLogin);
+    res.json({ success: true, message: "Score sauvegardé" });
+    
+  } catch (error) {
+    console.error('❌ Erreur sauvegarde complète:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// AJOUTER cette ligne AVANT la ligne 364 dans index.js :
+app.get('/test', (req, res) => {
+  console.log('🧪 Route de test appelée !');
+  res.json({ message: 'Test OK', timestamp: new Date() });
+});
+
+app.get('/api/test', (req, res) => {
+  console.log('🧪 Route /api/test appelée !');
+  res.json({ message: 'API Test OK', timestamp: new Date() });
 });
 
 // Démarrage serveur

@@ -2,22 +2,26 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
-import { AuthService } from './auth.service'; // AJOUTER CETTE LIGNE
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
-  private apiUrl = 'http://localhost:3000/api'; // AJOUTER CETTE LIGNE
+  private apiUrl = 'http://localhost:3000/api/games'; // ✅ CORRIGER AVEC /games
   
-  // CORRIGER le constructeur pour injecter AuthService :
   constructor(
     private http: HttpClient,
-    private authService: AuthService  // AJOUTER CETTE LIGNE
+    private authService: AuthService
   ) { }
 
+  // ✅ UTILISER la méthode getToken d'AuthService
+  private getToken(): string | null {
+    return this.authService.getToken();
+  }
+
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('authToken');
+    const token = this.getToken();
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -28,23 +32,19 @@ export class GameService {
     
     switch (difficulty) {
       case 'facile':
-        // Mots de 3 à 4 lettres : utiliser sizemax/4
         url = 'https://trouve-mot.fr/api/sizemax/4';
         break;
       case 'moyen':
-        // Mots de 5 à 7 lettres : utiliser size/5, size/6 ou size/7 aléatoirement
         const moyenLengths = [5, 6, 7];
         const randomLength = moyenLengths[Math.floor(Math.random() * moyenLengths.length)];
         url = `https://trouve-mot.fr/api/size/${randomLength}`;
         break;
       case 'difficile':
-        // Mots de 6 à 8 lettres : utiliser size/6, size/7 ou size/8
         const difficileLengths = [6, 7, 8];
         const randomDifficileLength = difficileLengths[Math.floor(Math.random() * difficileLengths.length)];
         url = `https://trouve-mot.fr/api/size/${randomDifficileLength}`;
         break;
       case 'cauchemar':
-        // Mots de minimum 8 lettres : utiliser sizemin/8
         url = 'https://trouve-mot.fr/api/sizemin/8';
         break;
       default:
@@ -52,7 +52,6 @@ export class GameService {
     }
     
     console.log(`🔗 Appel API trouve-mot: ${url}`);
-    
     return this.http.get(url);
   }
 
@@ -61,7 +60,7 @@ export class GameService {
     
     return this.getWordFromTrouveMot(difficulty).pipe(
       map((response: any) => {
-        console.log('📡 Réponse API reçue'); // Sans les données sensibles
+        console.log('📡 Réponse API reçue');
         
         if (response && response.length > 0) {
           const randomWord = response[Math.floor(Math.random() * response.length)];
@@ -72,10 +71,9 @@ export class GameService {
             length: randomWord.name.length
           };
           
-          console.log('✅ Nouveau mot généré (sécurisé)'); // Sans les données sensibles
+          console.log('✅ Nouveau mot généré (sécurisé)');
           return wordData;
         } else {
-          // AJOUTER ce else pour corriger l'erreur :
           console.log('⚠️ Aucun mot trouvé, utilisation fallback');
           return {
             gameId: Math.floor(Math.random() * 1000000),
@@ -104,38 +102,40 @@ export class GameService {
     );
   }
 
-  completeGame(gameId: number, score: number, time: number, attempts: number): Observable<any> {
-    const gameData = {
-      gameId,
+  // ✅ CORRIGER completeGame avec bonne URL
+  completeGame(gameId: number, score: number, time: number, attempts: number, playerAlias?: string): Observable<any> {
+    const headers = this.getHeaders();
+    
+    console.log('💾 Appel completeGame vers:', `${this.apiUrl}/${gameId}/complete`);
+    
+    // ✅ AJOUTER playerAlias dans le body
+    return this.http.post(`${this.apiUrl}/${gameId}/complete`, {
       score,
       time,
       attempts,
-      userId: 1 // Ou récupérer l'ID utilisateur réel
-    };
-    
-    // CORRIGER : Utiliser le bon port (3000 au lieu de 4200)
-    return this.http.post('http://localhost:3000/api/game/complete', gameData, {
-      headers: this.getHeaders()
-    });
+      playerAlias  // ← NOUVEAU
+    }, { headers }).pipe(
+      tap(response => {
+        console.log('✅ Réponse completeGame:', response);
+      }),
+      catchError(error => {
+        console.error('❌ Erreur completeGame:', error);
+        throw error;
+      })
+    );
   }
 
+  // ✅ CORRIGER getLeaderboard
   getLeaderboard(): Observable<any[]> {
-    // Maintenant this.authService.getToken() fonctionnera
-    const token = this.authService.getToken();
+    const headers = this.getHeaders();
+    const leaderboardUrl = 'http://localhost:3000/api/leaderboard';
     
-    console.log('🔄 Chargement leaderboard avec token:', token ? 'Présent' : 'Absent');
+    console.log('🔄 Appel leaderboard URL:', leaderboardUrl);
     
-    if (!token) {
-      console.error('❌ Aucun token disponible pour le leaderboard');
-      return of([]);
-    }
-    
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    
-    return this.http.get<any[]>(`${this.apiUrl}/leaderboard`, { headers }).pipe(
-      tap(scores => console.log('✅ Scores reçus:', scores)),
+    return this.http.get<any[]>(leaderboardUrl, { headers }).pipe(
+      tap(response => {
+        console.log('✅ Réponse leaderboard:', response);
+      }),
       catchError(error => {
         console.error('❌ Erreur leaderboard:', error);
         return of([]);
