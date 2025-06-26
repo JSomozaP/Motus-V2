@@ -34,7 +34,6 @@ export class LeaderboardModalComponent implements OnInit {
     this.isLoading = true;
     this.gameService.getLeaderboard().subscribe({
       next: (scores) => {
-        console.log('📊 Scores reçus pour modal:', scores);
         
         // CORRIGER le mapping pour afficher les noms :
         this.leaderboard = scores.map((score: any, index: number) => ({
@@ -46,7 +45,6 @@ export class LeaderboardModalComponent implements OnInit {
           averageScore: Math.round((score.best_score || 0) / (score.games_played || 1))
         }));
         
-        console.log('📊 Leaderboard mappé:', this.leaderboard);
         this.isLoading = false;
       },
       error: (error) => {

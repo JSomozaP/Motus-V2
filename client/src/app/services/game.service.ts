@@ -51,7 +51,6 @@ export class GameService {
         url = 'https://trouve-mot.fr/api/size/5';
     }
     
-    console.log(`🔗 Appel API trouve-mot: ${url}`);
     return this.http.get(url);
   }
 
@@ -82,7 +81,6 @@ export class GameService {
     
     return this.getWordFromTrouveMot(difficulty).pipe(
       map((response: any) => {
-        console.log('📡 Réponse API reçue');
         
         if (response && response.length > 0) {
           // FILTRE les mots valides seulement
@@ -91,7 +89,6 @@ export class GameService {
           );
           
           if (validWords.length === 0) {
-            console.log('⚠️ Aucun mot valide trouvé, utilisation fallback');
             return this.getFallbackWord();
           }
           
@@ -127,7 +124,6 @@ export class GameService {
   completeGame(gameId: number, score: number, time: number, attempts: number, playerAlias?: string): Observable<any> {
     const headers = this.getHeaders();
     
-    console.log('💾 Appel completeGame vers:', `${this.apiUrl}/${gameId}/complete`);
     
   
     return this.http.post(`${this.apiUrl}/${gameId}/complete`, {
@@ -137,7 +133,6 @@ export class GameService {
       playerAlias  
     }, { headers }).pipe(
       tap(response => {
-        console.log('✅ Réponse completeGame:', response);
       }),
       catchError(error => {
         console.error('❌ Erreur completeGame:', error);
@@ -151,11 +146,9 @@ export class GameService {
     const headers = this.getHeaders();
     const leaderboardUrl = 'http://localhost:3000/api/leaderboard';
     
-    console.log('🔄 Appel leaderboard URL:', leaderboardUrl);
     
     return this.http.get<any[]>(leaderboardUrl, { headers }).pipe(
       tap(response => {
-        console.log('✅ Réponse leaderboard:', response);
       }),
       catchError(error => {
         console.error('❌ Erreur leaderboard:', error);

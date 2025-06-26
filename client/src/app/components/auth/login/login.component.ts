@@ -59,7 +59,7 @@ export class LoginComponent {
   }
 
   onForgotPassword() {
-    console.log('🔧 onForgotPassword appelé'); // Debug
+    console.log('🔧 onForgotPassword appelé');
     
     if (!this.email) {
       this.errorMessage = 'Veuillez entrer votre email d\'abord';
@@ -69,7 +69,7 @@ export class LoginComponent {
     this.errorMessage = ''; // Efface les erreurs précédentes
     this.showForgotModal = true;
     
-    console.log('🔧 showForgotModal:', this.showForgotModal); // Debug
+    console.log('🔧 showForgotModal:', this.showForgotModal);
   }
 
   onConfirmReset() {

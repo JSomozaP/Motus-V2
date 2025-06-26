@@ -18,18 +18,16 @@ export class ConfirmationModalComponent {
   @Output() cancelled = new EventEmitter<void>();
 
   onConfirm() {
-    console.log('🔧 Modal confirmed'); // Debug
     this.confirmed.emit();
   }
 
   onCancel() {
-    console.log('🔧 Modal cancelled'); // Debug
     this.cancelled.emit();
   }
 
   onOverlayClick(event: MouseEvent) {
     // Empêcher la fermeture accidentelle en cliquant sur l'overlay
-    console.log('🔧 Overlay clicked'); // Debug
+    console.log('🔧 Overlay clicked');
     // NE PAS fermer automatiquement - COMMENTER cette ligne :
     // if (event.target === event.currentTarget) {
     //   this.onCancel();

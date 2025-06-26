@@ -23,7 +23,6 @@ export class KeyboardComponent {
 
   // Gestion des clics sur les touches
   onKeyClick(key: string) {
-    console.log('🎹 Clavier - touche cliquée:', key); // Debug
     
     // Normaliser la valeur pour le bouton supprimer
     if (key === 'DEL' || key === 'DELETE' || key === '⌫') {

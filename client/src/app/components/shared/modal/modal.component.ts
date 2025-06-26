@@ -26,7 +26,6 @@ export class ModalComponent implements OnInit {
 
   ngOnInit() {
     this.modalService.modal$.subscribe((modal: any) => {
-      console.log('🔔 Modal reçu:', modal); // DEBUG
       this.currentModal = modal;
       if (modal?.type === 'changePseudo') {
         this.newPseudo = '';
