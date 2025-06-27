@@ -67,7 +67,7 @@ export class LoginComponent {
       }
     });
   }
-
+  //Test comment
   onForgotPassword() {
     console.log('🔧 onForgotPassword appelé');
     
