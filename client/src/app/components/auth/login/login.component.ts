@@ -45,9 +45,19 @@ export class LoginComponent {
        
         
         this.authService.setToken(response.token);
+        this.authService.setUser(response.user);
         
         
-        this.router.navigate(['/game']);
+        this.router.navigate(['/game']).then(success => {
+          if (success) {
+            console.log('✅ Redirection réussie !');
+          } else {
+            console.error('❌ Échec de la redirection !');
+          }
+        }).catch(error => {
+          console.error('❌ Erreur lors de la redirection:', error);
+        });
+        
         this.isLoading = false;
       },
       error: (error) => {

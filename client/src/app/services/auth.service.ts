@@ -11,24 +11,25 @@ export class AuthService {
   private apiUrl = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {
-    // Vérifier si token existe au démarrage
-    const token = localStorage.getItem('authToken');
-    const emailVerified = localStorage.getItem('emailVerified');
-    this.isLoggedInSubject.next(!!token && emailVerified === 'true');
+    // VÉRIFIER QUE LE TOKEN EXISTE
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    this.isLoggedInSubject.next(!!token && !!user);
   }
 
-  // Remplacement TEMPORAIRE par des URLs complètes :
-  register(email: string, password: string): Observable<any> {
-    return this.http.post('http://localhost:3000/api/auth/register', { email, password });
+  register(pseudo: string, email: string, password: string): Observable<any> {
+    return this.http.post('http://localhost:3000/api/auth/register', { pseudo, email, password });
   }
 
   login(email: string, password: string): Observable<any> {
     return this.http.post('http://localhost:3000/api/auth/login', { email, password }).pipe(
       tap((response: any) => {
-        // Sauvegarder le token
         if (response.token) {
-          localStorage.setItem('authToken', response.token);
+          // STOCKER AVEC UN SEUL NOM DE CLÉ
+          localStorage.setItem('token', response.token);
           localStorage.setItem('user', JSON.stringify(response.user));
+          // METTRE À JOUR LE SUBJECT
+          this.isLoggedInSubject.next(true);
         }
       })
     );
@@ -39,33 +40,52 @@ export class AuthService {
   }
 
   logout(): void {
+    // NETTOYER TOUS LES TOKENS
+    localStorage.removeItem('token');
     localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     localStorage.removeItem('emailVerified');
     this.isLoggedInSubject.next(false);
   }
 
-  setToken(token: string): void {
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('emailVerified', 'true');
+  setToken(token: string) {
+    localStorage.setItem('token', token);
     this.isLoggedInSubject.next(true);
   }
 
-  getToken(): string | null {
-    return localStorage.getItem('authToken'); // Au lieu de 'token'
+  setUser(user: any) {
+    localStorage.setItem('user', JSON.stringify(user));
+    console.log('💾 Utilisateur stocké avec succès');
   }
 
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    const emailVerified = localStorage.getItem('emailVerified');
-    return !!token && emailVerified === 'true';
+  getUser() {
+    const userData = localStorage.getItem('user');
+    return userData ? JSON.parse(userData) : null;
+  }
+
+  getCurrentUserPseudo(): string {
+    const user = this.getUser();
+    return user?.pseudo || 'Joueur';
+  }
+
+  getToken(): string | null {
+    
+    return localStorage.getItem('token');
   }
 
   
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    const user = this.getUser();
+    const isAuth = !!token && !!user;
+    
+    return isAuth;
+  }
+
   forgotPassword(email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/forgot-password`, { email });
   }
 
-  
   resetPassword(token: string, newPassword: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/reset-password`, { 
       token, 

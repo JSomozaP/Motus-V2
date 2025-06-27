@@ -13,7 +13,7 @@ class EmailService {
     });
   }
 
-  async sendVerificationEmail(email, token) {
+  async sendVerificationEmail(email, token, pseudo = 'utilisateur') {
     const verificationUrl = `http://localhost:4200/verify/${token}`;
     
     const mailOptions = {
@@ -24,14 +24,14 @@ class EmailService {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px;">
             <h1 style="margin: 0; font-size: 28px;">🎯 MOTUS V2</h1>
-            <p style="margin: 10px 0 0 0; font-size: 16px;">Bienvenue dans l'univers du mot mystère !</p>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">Bienvenue ${pseudo} !</p>
           </div>
           
           <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin: 20px 0;">
             <h2 style="color: #333; margin-top: 0;">Activation de votre compte</h2>
             <p style="color: #555; line-height: 1.6;">
-              Merci de vous être inscrit sur MOTUS V2 ! Pour commencer à jouer et défier vos amis, 
-              veuillez activer votre compte en cliquant sur le bouton ci-dessous :
+              Salut <strong>${pseudo}</strong> ! Merci de vous être inscrit sur MOTUS V2 ! 
+              Pour commencer à jouer, veuillez activer votre compte :
             </p>
             
             <div style="text-align: center; margin: 30px 0;">

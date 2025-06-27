@@ -12,17 +12,33 @@
           type="text"
           id="pseudo"
           formControlName="pseudo"
-          placeholder="Votre pseudo"
+          placeholder="Votre pseudo de jeu"
           class="form-control"
           [class.is-invalid]="pseudo?.invalid && pseudo?.touched"
         >
         <div class="invalid-feedback" *ngIf="pseudo?.invalid && pseudo?.touched">
           <small *ngIf="pseudo?.errors?.['required']">Le pseudo est obligatoire</small>
           <small *ngIf="pseudo?.errors?.['minlength']">Le pseudo doit faire au moins 3 caractères</small>
-          <small *ngIf="pseudo?.errors?.['maxlength']">Le pseudo ne peut pas dépasser 50 caractères</small>
+          <small *ngIf="pseudo?.errors?.['maxlength']">Le pseudo ne peut pas dépasser 20 caractères</small>
         </div>
       </div>
 
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="votre@email.com"
+          class="form-control"
+          [class.is-invalid]="email?.invalid && email?.touched"
+        >
+        <div class="invalid-feedback" *ngIf="email?.invalid && email?.touched">
+          <small *ngIf="email?.errors?.['required']">L'email est obligatoire</small>
+          <small *ngIf="email?.errors?.['email']">L'email doit être valide</small>
+        </div>
+      </div>
 
       <!-- Mot de passe -->
       <div class="form-group">
@@ -39,27 +55,6 @@
           <small *ngIf="password?.errors?.['required']">Le mot de passe est obligatoire</small>
           <small *ngIf="password?.errors?.['minlength']">Le mot de passe doit faire au moins 6 caractères</small>
         </div>
-      </div>
-
-      <!-- Numéro de sécurité -->
-      <div class="form-group">
-        <label for="numero_secu">Numéro de sécurité *</label>
-        <input
-          type="text"
-          id="numero_secu"
-          formControlName="numero_secu"
-          placeholder="123456789012345"
-          maxlength="15"
-          class="form-control"
-          [class.is-invalid]="numero_secu?.invalid && numero_secu?.touched"
-        >
-        <div class="invalid-feedback" *ngIf="numero_secu?.invalid && numero_secu?.touched">
-          <small *ngIf="numero_secu?.errors?.['required']">Le numéro de sécurité est obligatoire</small>
-          <small *ngIf="numero_secu?.errors?.['pattern']">Le numéro de sécurité doit contenir exactement 15 chiffres</small>
-        </div>
-        <small class="form-text text-muted">
-          🔒 Numéro de sécurité à 15 chiffres (obligatoire selon l'énoncé)
-        </small>
       </div>
 
       <!-- Messages -->

@@ -80,7 +80,7 @@ export class GameGridComponent implements OnInit {
 
   constructor(
     private gameService: GameService,
-    private authService: AuthService,
+    private authService: AuthService, // 🔧 INJECTER LE SERVICE
     public modalService: ModalService,
     private toastService: ToastService,
     private router: Router,
@@ -97,6 +97,13 @@ export class GameGridComponent implements OnInit {
       }
       this.loadSavedStats();
       this.loadTopScores();
+    }
+    
+    // SYNCHRONISER LE PSEUDO AU DÉMARRAGE
+    const user = this.authService.getUser();
+    if (user?.pseudo) {
+      localStorage.setItem('playerAlias', user.pseudo);
+      
     }
   }
 
@@ -581,11 +588,18 @@ export class GameGridComponent implements OnInit {
     });
   }
 
-  getCurrentPlayerAlias(): string {
-    if (isPlatformBrowser(this.platformId)) {
-      return localStorage.getItem('playerAlias') || localStorage.getItem('gameAlias') || 'Joueur';
+  getCurrentPlayerAlias() {
+    // UTILISER LE VRAI PSEUDO DE L'UTILISATEUR CONNECTÉ
+    const user = this.authService.getUser();
+    const realPseudo = user?.pseudo;
+    
+    if (realPseudo) {
+      
+      return realPseudo;
     }
-    return 'Joueur';
+    
+    // Fallback sur localStorage si pas connecté
+    return localStorage.getItem('playerAlias') || localStorage.getItem('gameAlias') || 'Joueur';
   }
 
   changeAlias() {

@@ -3,11 +3,9 @@ require('dotenv').config(); // DOIT ÊTRE EN PREMIÈRE LIGNE !
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise'); // ← IMPORTANT: /promise
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const axios = require('axios');
-const emailService = require('./email-service'); 
+const emailService = require('./email-service'); // TIRET au lieu de POINT vu que je me suis planté
 
 // Configuration base de données
 const dbConfig = {
@@ -82,51 +80,52 @@ const defaultUser = {
 // ROUTES AUTHENTIFICATION
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { pseudo, email, password } = req.body;
     
-    // Vérifier si l'utilisateur existe
-    
-    const [existing] = await connection.execute(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
-    );
-    
-    if (existing.length > 0) {
-      return res.status(400).json({ error: 'Email déjà utilisé' });
+    if (!pseudo || !email || !password) {
+      return res.status(400).json({ error: 'Pseudo, email et mot de passe requis' });
     }
-    
-    // Hasher le mot de passe
+
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = Math.random().toString(36).substr(2, 15);
+
+    // Insérer en base
+    const query = 'INSERT INTO users (pseudo, email, password, verification_token) VALUES (?, ?, ?, ?)';
+    const values = [pseudo, email, hashedPassword, verificationToken];
+    const [result] = await connection.execute(query, values);
+
     
-    // Générer token de vérification
-    const verificationToken = Math.random().toString(36).substr(2, 9);
-    
-    // Insérer l'utilisateur
-    await connection.execute(
-      'INSERT INTO users (email, password, verification_token) VALUES (?, ?, ?)',
-      [email, hashedPassword, verificationToken]
-    );
-    
-    // ENVOYER EMAIL RÉEL (pas juste console.log)
-    const emailSent = await emailService.sendVerificationEmail(email, verificationToken);
-    
-    if (emailSent) {
-      console.log(`📧 Email de vérification envoyé à ${email}`);
-      res.json({ 
-        message: 'Inscription réussie. Vérifiez votre email pour activer votre compte.',
-        emailSent: true 
-      });
-    } else {
-      console.log(`⚠️ Email non envoyé, mais compte créé pour ${email}`);
-      res.json({ 
-        message: 'Inscription réussie. Email de vérification non envoyé (vérifiez la config SMTP).',
-        emailSent: false 
-      });
+    try {
+      
+      // 🔧 PASSER LE PSEUDO À LA FONCTION EMAIL
+      const emailSent = await emailService.sendVerificationEmail(email, verificationToken, pseudo);
+      if (emailSent) {
+        console.log('📧 Email de vérification envoyé à:', email, 'pour pseudo:', pseudo);
+      } else {
+        console.error('❌ Échec envoi email pour:', email);
+      }
+    } catch (emailError) {
+      console.error('❌ Erreur envoi email:', emailError);
     }
+
+    res.status(201).json({ 
+      message: 'Compte créé ! Vérifiez votre email pour l\'activer.',
+      userId: result.insertId 
+    });
     
   } catch (error) {
     console.error('Erreur inscription:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    if (error.code === 'ER_DUP_ENTRY') {
+      if (error.sqlMessage.includes('pseudo')) {
+        res.status(400).json({ error: 'Ce pseudo est déjà utilisé' });
+      } else if (error.sqlMessage.includes('email')) {
+        res.status(400).json({ error: 'Cet email est déjà utilisé' });
+      } else {
+        res.status(400).json({ error: 'Pseudo ou email déjà utilisé' });
+      }
+    } else {
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
   }
 });
 
@@ -180,19 +179,22 @@ app.post('/api/auth/login', async (req, res) => {
     const token = jwt.sign(
       { 
         userId: user.id, 
-        email: user.email 
+        email: user.email,
+        pseudo: user.pseudo  // AJOUTER LE PSEUDO DANS LE TOKEN
       },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
     
-    console.log('Connexion réussie pour:', user.email);
+    console.log('Connexion réussie pour:', user.email, 'pseudo:', user.pseudo);
     
+    // RENVOYER LE PSEUDO AU FRONTEND
     res.json({
       token,
       user: {
         id: user.id,
-        email: user.email
+        email: user.email,
+        pseudo: user.pseudo  
       }
     });
     
@@ -362,33 +364,38 @@ app.post('/api/game/guess', authenticateToken, async (req, res) => {
 });
 
 // ROUTE LEADERBOARD
-app.get('/api/leaderboard', authenticateToken, async (req, res) => {
-  console.log('🚀 === ENDPOINT /api/leaderboard APPELÉ ===');
-  console.log('👤 Utilisateur:', req.user.email);
-  console.log('🔍 Method:', req.method);
-  console.log('🌐 URL:', req.url);
-  
+app.get('/api/leaderboard', async (req, res) => {
   try {
-    console.log('💾 Récupération leaderboard...');
-    const [leaderboard] = await connection.execute(`
+    console.log('📊 Récupération du leaderboard...');
+    
+    const query = `
       SELECT 
-        login,
-        difficulty,
+        login as player_alias,
+        login as email,
         score as best_score,
+        DATE_FORMAT(created_at, '%d/%m/%Y') as date_achieved,
+        difficulty,
         words_found as games_played,
-        created_at as date_achieved
-      FROM wall_of_fame
-      ORDER BY score DESC
-      LIMIT 50
-    `);
+        score,
+        1 as best_streak
+      FROM wall_of_fame 
+      ORDER BY score DESC 
+      LIMIT 10
+    `;
     
-    console.log('🏆 Données trouvées:', leaderboard.length, 'entrées');
-    console.log('📊 Premier élément:', leaderboard[0]);
+    const [rows] = await connection.execute(query);
     
-    res.status(200).json(leaderboard);
+    console.log(`✅ ${rows.length} scores récupérés`);
+    console.log('📋 Premier score:', rows[0]); // Pour debug
+    
+    res.json(rows);
+    
   } catch (error) {
-    console.error('❌ Erreur MySQL:', error);
-    res.status(500).json({ error: 'Erreur serveur', details: error.message });
+    console.error('❌ Erreur leaderboard détaillée:', error.message);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération du leaderboard',
+      details: error.message 
+    });
   }
 });
 
@@ -440,6 +447,44 @@ app.post('/api/games/:id/complete', authenticateToken, async (req, res) => {
   }
 });
 
+// Ajouter cette route après les autres routes API
+app.get('/api/mot-aleatoire', async (req, res) => {
+  try {
+    console.log('🎯 Demande mot aléatoire, difficulté:', req.query.difficulte);
+    
+    const { difficulte } = req.query;
+    
+    let lengthCondition = '';
+    switch(difficulte) {
+      case 'facile':
+        lengthCondition = 'WHERE LENGTH(mot) BETWEEN 4 AND 6';
+        break;
+      case 'moyen':
+        lengthCondition = 'WHERE LENGTH(mot) BETWEEN 7 AND 8';
+        break;
+      case 'difficile':
+        lengthCondition = 'WHERE LENGTH(mot) >= 9';
+        break;
+      default:
+        lengthCondition = 'WHERE LENGTH(mot) BETWEEN 4 AND 8';
+    }
+    
+    const query = `SELECT mot FROM mots ${lengthCondition} ORDER BY RAND() LIMIT 1`;
+    const [rows] = await connection.execute(query);
+    
+    if (rows.length === 0) {
+      console.log('❌ Aucun mot trouvé pour difficulté:', difficulte);
+      return res.status(404).json({ error: 'Aucun mot trouvé pour cette difficulté' });
+    }
+    
+    console.log('✅ Mot trouvé:', rows[0].mot);
+    res.json({ mot: rows[0].mot.toUpperCase() });
+    
+  } catch (error) {
+    console.error('❌ Erreur mot aléatoire:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
 
 app.get('/test', (req, res) => {
   console.log('🧪 Route de test appelée !');

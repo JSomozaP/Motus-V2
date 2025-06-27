@@ -31,26 +31,25 @@ export class LeaderboardModalComponent implements OnInit {
   }
 
   loadLeaderboard() {
-    this.isLoading = true;
     this.gameService.getLeaderboard().subscribe({
       next: (scores) => {
+        console.log('🏆 Modal - Raw data from API:');
+        console.table(scores);
         
-        // CORRIGER le mapping pour afficher les noms :
+        
         this.leaderboard = scores.map((score: any, index: number) => ({
           rank: index + 1,
-          playerName: score.login || score.playerAlias || 'Joueur',
-          totalScore: score.best_score || score.score || 0,
-          gamesPlayed: score.games_played || score.wordsFound || 1,
-          winRate: Math.round(((score.games_won || score.gamesPlayed || 1) / (score.games_played || 1)) * 100),
-          averageScore: Math.round((score.best_score || 0) / (score.games_played || 1))
+          playerAlias: score.email || score.login || 'Joueur',    
+          totalScore: score.best_score || score.score || 0,       
+          wordsFound: score.games_played || 1,                    
+          date: score.date_achieved || new Date().toLocaleDateString('fr-FR')
         }));
         
-        this.isLoading = false;
+        console.log('🏆 Modal - Mapped data:');
+        console.table(this.leaderboard);
       },
       error: (error) => {
-        console.error('❌ Erreur leaderboard modal:', error);
-        this.leaderboard = [];
-        this.isLoading = false;
+        console.error('❌ Erreur modal leaderboard:', error);
       }
     });
   }
