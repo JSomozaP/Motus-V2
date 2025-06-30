@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -24,9 +23,9 @@ export class RegisterComponent {
     private router: Router
   ) {
     this.registerForm = this.fb.group({
-      pseudo: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      numero_secu: ['', [Validators.required, Validators.pattern(/^\d{15}$/)]]
+      pseudo: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
@@ -37,21 +36,32 @@ export class RegisterComponent {
       
       const formData = this.registerForm.value;
       
+     
       this.authService.register(
-        formData.email,
-        formData.password
+        formData.pseudo,   // pseudo choisi par l'utilisateur
+        formData.email,    // email
+        formData.password  // password
       ).subscribe({
         next: (response: any) => {
           console.log("✅ Inscription réussie", response);
-          this.successMessage = "Inscription réussie ! Redirection vers la connexion...";
+          this.successMessage = "Inscription réussie ! Vérifiez votre email pour activer votre compte.";
           this.isLoading = false;
           setTimeout(() => {
             this.router.navigate(["/login"]);
-          }, 2000);
+          }, 3000);
         },
         error: (error: any) => {
           console.error("❌ Erreur inscription", error);
-          this.errorMessage = error.error?.message || "Erreur lors de l'inscription";
+          
+          // GESTION SPÉCIFIQUE DU PSEUDO DÉJÀ EXISTANT
+          if (error.error?.error?.includes('pseudo') || error.error?.error?.includes('Duplicate')) {
+            this.errorMessage = "Ce pseudo est déjà utilisé, veuillez en choisir un autre.";
+          } else if (error.error?.error?.includes('email')) {
+            this.errorMessage = "Cet email est déjà utilisé.";
+          } else {
+            this.errorMessage = error.error?.error || "Erreur lors de l'inscription";
+          }
+          
           this.isLoading = false;
         }
       });
@@ -68,6 +78,6 @@ export class RegisterComponent {
   }
 
   get pseudo() { return this.registerForm.get('pseudo'); }
+  get email() { return this.registerForm.get('email'); }
   get password() { return this.registerForm.get('password'); }
-  get numero_secu() { return this.registerForm.get('numero_secu'); }
 }

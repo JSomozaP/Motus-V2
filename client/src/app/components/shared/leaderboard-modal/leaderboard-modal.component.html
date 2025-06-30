@@ -1,0 +1,55 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>🏆 Hall of Fame</h2>
+      <button class="close-btn" (click)="close()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        <p>Chargement du classement...</p>
+      </div>
+      
+      <div *ngIf="!isLoading && leaderboard.length === 0" class="empty-state">
+        <div class="empty-icon">🎯</div>
+        <h3>Aucun score pour le moment</h3>
+        <p>Soyez le premier à marquer l'histoire !</p>
+      </div>
+      
+      <div *ngIf="!isLoading && leaderboard.length > 0" class="leaderboard-list">
+        <div class="leaderboard-header">
+          <span class="rank">Rang</span>
+          <span class="player">Joueur</span>
+          <span class="score">Score</span>
+          <span class="games">Parties</span>
+        </div>
+        
+        <div *ngFor="let player of leaderboard; let i = index" 
+             class="leaderboard-row" 
+             [class.top-1]="i === 0"
+             [class.top-2]="i === 1" 
+             [class.top-3]="i === 2">
+          <span class="rank">
+            <span *ngIf="i === 0" class="medal gold">🥇</span>
+            <span *ngIf="i === 1" class="medal silver">🥈</span>
+            <span *ngIf="i === 2" class="medal bronze">🥉</span>
+            <span *ngIf="i > 2">{{ i + 1 }}</span>
+          </span>
+          <span class="player">{{ player.playerAlias }}</span>
+          <span class="score">{{ player.totalScore }}</span>           
+          <span class="games">{{ player.wordsFound }}</span>  
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="refresh-btn" (click)="refresh()" [disabled]="isLoading">
+        🔄 Actualiser
+      </button>
+      <button class="close-btn-footer" (click)="close()">
+        Fermer
+      </button>
+    </div>
+  </div>
+</div>

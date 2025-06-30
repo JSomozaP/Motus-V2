@@ -20,7 +20,7 @@ interface Modal {
 })
 export class ModalComponent implements OnInit {
   currentModal: Modal | null = null;
-  newPseudo: string = '';
+  newPseudo: string | null = '';
 
   constructor(private modalService: ModalService) {}
 

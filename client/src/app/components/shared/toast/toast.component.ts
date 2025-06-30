@@ -29,11 +29,11 @@ import { Observable } from 'rxjs';
   imports: [CommonModule]
 })
 export class ToastComponent {
-  // ✅ Correction : initialisation via getter pour éviter le problème d'initialisation
+  // initialisation via getter pour éviter le problème d'initialisation
   toasts$: Observable<Toast[]>;
 
   constructor(private toastService: ToastService) {
-    this.toasts$ = this.toastService.toasts$; // ✅ Initialisation dans le constructeur
+    this.toasts$ = this.toastService.toasts$; // Initialisation dans le constructeur
   }
 
   remove(id: number) {

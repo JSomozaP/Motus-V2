@@ -1,4 +1,4 @@
-<!-- AJOUTER ce cas pour le changement de pseudo -->
+<!-- Cas pour le changement de pseudo -->
 <div class="modal-overlay" *ngIf="currentModal" (click)="close()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -21,7 +21,7 @@
       </div>
       
       <!-- CAS NORMAL : Confirmation -->
-      <div *ngIf="currentModal.type === 'confirm'">
+      <div *ngIf="currentModal.type !== 'changePseudo'">
         <p>{{ currentModal.content }}</p>
       </div>
     </div>
@@ -30,13 +30,13 @@
       <!-- BOUTONS pour changement pseudo -->
       <div *ngIf="currentModal.type === 'changePseudo'">
         <button class="btn-cancel" (click)="close()">Annuler</button>
-        <button class="btn-confirm" (click)="confirmPseudo()" [disabled]="!newPseudo?.trim()">
-          Confirmer
-        </button>
+        <button class="btn-confirm" (click)="confirmPseudo()" [disabled]="!newPseudo || !newPseudo.trim()">
+        Confirmer
+    </button>
       </div>
       
       <!-- BOUTONS pour confirmation -->
-      <div *ngIf="currentModal.type === 'confirm'">
+      <div *ngIf="currentModal.type !== 'changePseudo'">
         <button class="btn-cancel" (click)="confirmModal(false)">Annuler</button>
         <button class="btn-confirm" (click)="confirmModal(true)">
           {{ currentModal.confirmText || 'Confirmer' }}

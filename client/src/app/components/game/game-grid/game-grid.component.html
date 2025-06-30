@@ -63,7 +63,7 @@
   </div>
 </div>
 
-<!-- ✅ Informations du joueur -->
+<!-- Informations du joueur -->
 <div class="player-info" *ngIf="isAuthenticated && !showLoginModal">
   <div class="player-card">
     <span class="player-icon">👤</span>
@@ -72,7 +72,7 @@
   </div>
 </div>
 
-<!-- ✅ Interface de jeu avec stats et contrôles -->
+<!-- Interface de jeu avec stats et contrôles -->
 <div class="game-interface" *ngIf="isAuthenticated && !showLoginModal">
   
   <!-- Stats de session en temps réel -->
@@ -116,10 +116,10 @@
     </button>
   </div>
 
-  <!-- ✅ APERÇU TOP 3 - CORRIGÉ -->
+  <!-- APERÇU TOP 3 -->
   <div class="top-players-preview" *ngIf="!gameOver && isAuthenticated">
     <div class="preview-header">
-      <h3>🏆 Podium des Champions</h3>
+      <h3>🏆 Hall of Fame</h3>
       <p class="preview-subtitle">Top 3 des meilleurs scores</p>
     </div>
     
@@ -166,9 +166,9 @@
     
     <!-- Actions -->
     <div class="preview-actions">
-      <a routerLink="/leaderboard" class="see-full-leaderboard">
+      <button (click)="openLeaderboardModal()" class="see-full-leaderboard">
         📊 Voir le classement complet
-      </a>
+      </button>
       <button (click)="loadTopScores()" class="refresh-scores">
         🔄 Actualiser
       </button>
@@ -217,7 +217,7 @@
     <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
   </div>
 
-  <!-- ✅ Section de difficulté repositionnée avant la grille -->
+  <!-- Section de difficulté repositionnée avant la grille -->
   <div class="difficulty-section">
     <h3>🎯 Niveau de difficulté</h3>
     
@@ -228,7 +228,7 @@
       </button>
     </div>
     
-    <!-- ✅ Modal de sélection de difficulté avec Cauchemar -->
+    <!-- Modal de sélection de difficulté avec Cauchemar -->
     <div *ngIf="showDifficultySelector" class="difficulty-selector">
       <div class="difficulty-options">
         <button 
@@ -272,7 +272,7 @@
         </button>
       </div>
 
-      <!-- ✅ Boutons de prévisualisation -->
+      <!-- Boutons de prévisualisation -->
       <div class="preview-buttons">
         <button class="preview-btn" (click)="previewDifficulty('facile')">👁️ Facile</button>
         <button class="preview-btn" (click)="previewDifficulty('moyen')">👁️ Moyen</button>
@@ -353,7 +353,7 @@
   <div *ngIf="gameOver" class="game-over">
     <h2>Partie terminée !</h2>
     <div class="game-result">
-      <!-- ✅ Messages conditionnels corrigés -->
+      <!-- Messages conditionnels corrigés -->
       <p *ngIf="wordFound">🎉 Félicitations ! Vous avez trouvé le mot !</p>
       <p *ngIf="!wordFound" class="failure-message">😔 Dommage ! Vous n'avez pas trouvé le mot...</p>
       
@@ -362,7 +362,7 @@
         <div class="word-value">{{ targetWord }}</div>
       </div>
       
-      <!-- ✅ Résumé des performances -->
+      <!-- Résumé des performances -->
       <div class="performance-summary" *ngIf="sessionStats.wordsFound > 0">
         <h3>📊 Résumé de votre session</h3>
         <div class="summary-stats">
@@ -411,18 +411,14 @@
   </div>
 </div>
 
-<!-- ✅ Modal générique -->
-<app-modal
-  [isOpen]="(modalService.modal$ | async) !== null"
-  [type]="(modalService.modal$ | async)?.type === 'input' ? 'input' : 'confirm'"
-  [title]="(modalService.modal$ | async)?.title || ''"
-  [message]="(modalService.modal$ | async)?.message || ''"
-  [confirmText]="(modalService.modal$ | async)?.confirmText || 'Confirmer'"
-  [placeholder]="(modalService.modal$ | async)?.placeholder || ''"
-  [initialValue]="(modalService.modal$ | async)?.initialValue || ''"
-  (confirmed)="modalService.close()"
-  (cancelled)="modalService.cancel()">
-</app-modal>
+<!-- Modal générique -->
+<app-modal></app-modal>
 
-<!-- ✅ Système de toasts (placé à la fin) -->
+<!-- Système de toasts (placé à la fin) -->
 <app-toast></app-toast>
+
+<!-- AJOUTER à la toute fin du fichier, juste avant </div> final : -->
+<app-leaderboard-modal
+  [isVisible]="showLeaderboardModal"
+  (closed)="closeLeaderboardModal()">
+</app-leaderboard-modal>

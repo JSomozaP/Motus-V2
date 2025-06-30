@@ -50,21 +50,30 @@
         <span *ngIf="isLoading">⏳ Connexion...</span>
         <span *ngIf="!isLoading">🚀 Se connecter</span>
       </button>
+
+      <div class="forgot-password">
+        <button type="button" (click)="onForgotPassword()" class="forgot-link">
+          🔒 Mot de passe oublié ?
+        </button>
+      </div>
     </form>
 
     <div class="register-link">
       <p>Pas encore de compte ?</p>
       <a routerLink="/register">📝 Créer un compte</a>
     </div>
-
-    <!-- Compte de test pour développement -->
-    <div class="test-account">
-      <h3>🧪 Compte de test :</h3>
-      <p><strong>Email:</strong> jeremy&#64;test.com</p>
-      <p><strong>Mot de passe:</strong> Test123</p>
-      <button (click)="useTestAccount()" type="button" class="test-btn">
-        Utiliser le compte de test
-      </button>
-    </div>
   </div>
+</div>
+
+<app-confirmation-modal
+  [isVisible]="showForgotModal"
+  title="🔒 Réinitialisation de mot de passe"
+  [message]="'Envoyer un email de réinitialisation à ' + email + ' ?'"
+  confirmText="Envoyer"
+  (confirmed)="onConfirmReset()"
+  (cancelled)="onCancelReset()">
+</app-confirmation-modal>
+
+<div *ngIf="resetMessage" class="success-message">
+  {{ resetMessage }}
 </div>

@@ -1,0 +1,27 @@
+<div class="verify-container">
+  <div class="verify-card">
+    <h1>🎯 MOTUS V2</h1>
+    
+    <div *ngIf="isLoading" class="loading">
+      <h2>⏳ Vérification en cours...</h2>
+      <p>Activation de votre compte...</p>
+    </div>
+    
+    <div *ngIf="success" class="success">
+      <h2>✅ Compte activé avec succès !</h2>
+      <p>Votre compte a été activé. Vous pouvez maintenant vous connecter.</p>
+      <p class="redirect-info">Redirection automatique dans 3 secondes...</p>
+      <button class="login-btn" (click)="goToLogin()">
+        🚀 Se connecter maintenant
+      </button>
+    </div>
+    
+    <div *ngIf="error" class="error">
+      <h2>❌ Erreur de vérification</h2>
+      <p>{{ error }}</p>
+      <button class="login-btn" (click)="goToLogin()">
+        🔄 Retour à la connexion
+      </button>
+    </div>
+  </div>
+</div>
