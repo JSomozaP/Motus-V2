@@ -1,9 +1,9 @@
 const bcrypt = require('bcrypt');
 
 async function generateCorrectHash() {
-  const password = 'motus123';
+  const password = process.env.DEFAULT_PASSWORD || 'changeme123';
   const hash = await bcrypt.hash(password, 10);
-  console.log('🔐 Nouveau hash pour motus123:');
+  console.log('🔐 Nouveau hash généré pour le mot de passe par défaut');
   console.log(hash);
   
   // Vérifier que ça marche

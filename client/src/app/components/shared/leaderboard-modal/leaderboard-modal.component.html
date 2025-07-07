@@ -22,7 +22,8 @@
           <span class="rank">Rang</span>
           <span class="player">Joueur</span>
           <span class="score">Score</span>
-          <span class="games">Parties</span>
+          <span class="difficulty">Difficulté</span>
+          <span class="date">Date</span>
         </div>
         
         <div *ngFor="let player of leaderboard; let i = index" 
@@ -37,8 +38,13 @@
             <span *ngIf="i > 2">{{ i + 1 }}</span>
           </span>
           <span class="player">{{ player.playerAlias }}</span>
-          <span class="score">{{ player.totalScore }}</span>           
-          <span class="games">{{ player.wordsFound }}</span>  
+          <span class="score">{{ player.totalScore }}</span>
+          <span class="difficulty">
+            <span class="difficulty-badge" [ngClass]="'diff-' + player.difficulty">
+              {{ getDifficultyLabel(player.difficulty) }}
+            </span>
+          </span>
+          <span class="date">{{ player.date }}</span>
         </div>
       </div>
     </div>

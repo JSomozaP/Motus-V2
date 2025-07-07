@@ -11,8 +11,8 @@ const emailService = require('./email-service'); // TIRET au lieu de POINT vu qu
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'votre_mot_de_passe',
-  database: 'motus'
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'motus'
 };
 
 // VARIABLE GLOBALE pour stocker la connexion
@@ -380,7 +380,7 @@ app.get('/api/leaderboard', async (req, res) => {
         1 as best_streak
       FROM wall_of_fame 
       ORDER BY score DESC 
-      LIMIT 10
+      LIMIT 100
     `;
     
     const [rows] = await connection.execute(query);
