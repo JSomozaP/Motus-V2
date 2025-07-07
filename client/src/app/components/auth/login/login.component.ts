@@ -28,10 +28,15 @@ export class LoginComponent {
     private router: Router
   ) {}
 
-  // Méthode pour le bouton de test
+  // Méthode pour le bouton de test (utilise les variables d'environnement en développement)
   useTestAccount() {
-    this.email = 'jeremy@test.com';
-    this.password = 'motus123';
+    // En production, cette fonctionnalité devrait être désactivée
+    if (typeof window !== 'undefined' && (window as any)['isDevelopment']) {
+      this.email = 'demo@example.com';
+      this.password = 'DemoPassword123!';
+    } else {
+      console.warn('Test account feature is disabled in production');
+    }
   }
 
   onSubmit() {

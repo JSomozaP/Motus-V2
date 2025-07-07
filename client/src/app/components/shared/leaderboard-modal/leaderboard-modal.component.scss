@@ -17,8 +17,8 @@
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
+  max-width: 700px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   animation: slideIn 0.3s ease;
@@ -103,18 +103,21 @@
 .leaderboard-list {
   .leaderboard-header {
     display: grid;
-    grid-template-columns: 80px 1fr 100px 100px;
+    grid-template-columns: 80px 1fr 100px 120px 100px;
     gap: 15px;
     padding: 15px 25px;
     background: #f8f9fa;
     font-weight: 600;
     color: #333;
     border-bottom: 1px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 
   .leaderboard-row {
     display: grid;
-    grid-template-columns: 80px 1fr 100px 100px;
+    grid-template-columns: 80px 1fr 100px 120px 100px;
     gap: 15px;
     padding: 15px 25px;
     border-bottom: 1px solid #f0f0f0;
@@ -154,6 +157,39 @@
     .score {
       font-weight: 600;
       color: #667eea;
+    }
+
+    .difficulty {
+      display: flex;
+      align-items: center;
+    }
+
+    .difficulty-badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      
+      &.diff-facile {
+        background: #d4edda;
+        color: #155724;
+      }
+      
+      &.diff-moyen {
+        background: #fff3cd;
+        color: #856404;
+      }
+      
+      &.diff-difficile {
+        background: #f8d7da;
+        color: #721c24;
+      }
+    }
+
+    .date {
+      font-size: 14px;
+      color: #666;
     }
   }
 }
@@ -227,9 +263,24 @@
 
   .leaderboard-header,
   .leaderboard-row {
-    grid-template-columns: 60px 1fr 80px 80px;
-    gap: 10px;
+    grid-template-columns: 50px 1fr 80px 80px;
+    gap: 8px;
     padding: 12px 15px;
     font-size: 14px;
+    
+    .difficulty {
+      display: none; // Cache la difficulté sur mobile
+    }
+    
+    .date {
+      display: none; // Cache la date sur mobile
+    }
+  }
+  
+  .leaderboard-header {
+    .difficulty,
+    .date {
+      display: none;
+    }
   }
 }

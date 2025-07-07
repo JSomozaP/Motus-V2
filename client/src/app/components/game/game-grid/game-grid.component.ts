@@ -63,6 +63,7 @@ export class GameGridComponent implements OnInit {
   topScores: any[] = [];
   perfectWordStreak = 0;
   wordStartTime = Date.now();
+  sessionStartTime = Date.now();
   activeScoreTab = 'session';
   currentDifficulty: 'facile' | 'moyen' | 'difficile' | 'cauchemar' = 'facile';
   showDifficultySelector = false;
@@ -503,7 +504,8 @@ export class GameGridComponent implements OnInit {
       bonusPoints: wordResult.bonusPoints,
       isPerfect: wordResult.isPerfect
     });
-    this.saveScoreViaBackend(wordResult.wordScore);
+    // Ne plus sauvegarder chaque mot individuellement
+    // this.saveScoreViaBackend(wordResult.wordScore);
     this.saveStats();
   }
 
@@ -520,6 +522,26 @@ export class GameGridComponent implements OnInit {
       },
       error: (error) => {
         console.error('❌ Erreur sauvegarde pour', playerAlias, ':', error);
+      }
+    });
+  }
+
+  private saveSessionScoreViaBackend(totalScore: number, wordsFound: number) {
+    const playerAlias = this.getCurrentPlayerAlias();
+    const userId = this.generateUserIdFromAlias(playerAlias);
+    const sessionDuration = Math.round((Date.now() - this.sessionStartTime) / 1000);
+    
+    console.log(`💾 Sauvegarde score de session: ${totalScore} (${wordsFound} mots trouvés)`);
+    
+    this.gameService.completeGame(this.currentGameId, totalScore, sessionDuration, wordsFound, playerAlias).subscribe({
+      next: (response) => {
+        console.log('✅ Score de session sauvé pour', playerAlias, ':', response);
+        setTimeout(() => {
+          this.loadTopScores();
+        }, 500);
+      },
+      error: (error) => {
+        console.error('❌ Erreur sauvegarde session pour', playerAlias, ':', error);
       }
     });
   }
@@ -544,6 +566,10 @@ export class GameGridComponent implements OnInit {
       this.toastService.info('Aucun mot trouvé !', 2000);
       return;
     }
+    
+    // Sauvegarder le score total de la session
+    this.saveSessionScoreViaBackend(this.sessionStats.totalScore, this.sessionStats.wordsFound);
+    
     this.toastService.success(`🏁 Session terminée ! Score: ${this.sessionStats.totalScore}`, 4000);
     setTimeout(() => {
       this.loadTopScores();
@@ -640,6 +666,7 @@ export class GameGridComponent implements OnInit {
     };
     this.wordsHistory = [];
     this.perfectWordStreak = 0;
+    this.sessionStartTime = Date.now(); // Réinitialiser le temps de début de session
     this.saveStats();
   }
 
